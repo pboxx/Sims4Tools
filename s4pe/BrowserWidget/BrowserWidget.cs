@@ -112,51 +112,77 @@ namespace S4PIDemoFE
 
             try
             {
-                listView1.SuspendLayout();
-                listView1.BeginUpdate();
-                listView1.ListViewItemSorter = null;
+                    listView1.SuspendLayout();
+                    listView1.BeginUpdate();
+                    listView1.ListViewItemSorter = null;
 
-                SelectedResource = null;//not restored for AddRange
+                    SelectedResource = null;//not restored for AddRange
+                   
+                    Application.DoEvents();
 
-                pbLabel.Text = "Reading resources...";
-                Application.DoEvents();
-
-                List<IResourceIndexEntry> lrie = range.ToList();
-
-                if (pb != null)
-                {
-                    pb.Value = 0;
-                    pb.Maximum = lrie.Count();
-                }
-
-                bool newNameMap = false;
-                int i = 0;
-                DateTime tick = DateTime.UtcNow.AddMilliseconds(tock);
-                List<Tuple<IResourceIndexEntry, ListViewItem>> list = new List<Tuple<IResourceIndexEntry, ListViewItem>>();
-                foreach (var pair in lrie.Select(x => { i++; return Tuple.Create(x, CreateItem(x)); }).Where(x => x.Item2 != null))
-                {
-                    try
-                    {
-                        list.Add(pair);
-                        lookup.Add(pair.Item1, pair.Item2);
-                        if (pair.Item1.ResourceType == 0x0166038C) newNameMap = true;
-                    }
-                    finally
-                    {
-                        if (tick < DateTime.UtcNow)
+                 
+                   
+                        this.pbLabel.Invoke(new Action(() =>
                         {
-                            tick = DateTime.UtcNow.AddMilliseconds(tock);
-                            if (pb != null) { pb.Value = i; Application.DoEvents(); }
-                        }
+                            pbLabel.Text = "Reading resources...";
+                        }));
+
+                
+                    List<IResourceIndexEntry> lrie = range.ToList();
+
+                    if (pb != null)
+                    {
+                        pb.Value = 0;
+                        pb.Maximum = lrie.Count();
                     }
-                }
 
-                pb.Value = 0;
-                pbLabel.Text = "Updating resource list...";
-                Application.DoEvents();
-                listView1.Items.AddRange(list.Select(x => x.Item2).ToArray());
+                    bool newNameMap = false;
+                    int i = 0;
+                    DateTime tick = DateTime.UtcNow.AddMilliseconds(tock);
+                    List<Tuple<IResourceIndexEntry, ListViewItem>> list = new List<Tuple<IResourceIndexEntry, ListViewItem>>();
+                    
+                    System.Threading.Thread task = new System.Threading.Thread(new System.Threading.ParameterizedThreadStart(delegate
+                    {
+                        foreach (var pair in lrie.Select(x =>
+                        {
+                            i++;
+                            return Tuple.Create(x, CreateItem(x));
+                        }).Where(x => x.Item2 != null))
+                        {
+                            try
+                            {
+                                list.Add(pair);
+                                lookup.Add(pair.Item1, pair.Item2);
+                                if (pair.Item1.ResourceType == 0x0166038C) newNameMap = true;
+                            }
+                            finally
+                            {
+                                if (tick < DateTime.UtcNow)
+                                {
+                                    tick = DateTime.UtcNow.AddMilliseconds(tock);
+                                    if (pb != null) { pb.Value = i; Application.DoEvents(); }
+                                }
+                            }
+                        }
+              
 
-                if (newNameMap) { ClearNameMap(); nameMap_ResourceChanged(null, null); }
+                    pb.Value = 0;
+                    pbLabel.Invoke(new Action(() =>
+                    {
+                        pbLabel.Text = "Updating resource list...";
+                    }));
+
+                    Application.DoEvents();
+                    listView1.Invoke(new Action(() =>
+                    {
+                        listView1.Items.AddRange(list.Select(x => x.Item2).ToArray());
+                    }));
+
+                    if (newNameMap) { ClearNameMap(); nameMap_ResourceChanged(null, null); }
+               
+                    }));
+                    task.Start();
+
             }
             finally
             {
