@@ -229,8 +229,12 @@ namespace S4PIDemoFE
 
                 Application.DoEvents();
                 DateTime now = DateTime.UtcNow;
-                IList<IResourceIndexEntry> lrie =
-                    this.DupsOnly(this.CurrentPackage.FindAll(x => MainForm.stblList.Contains(x.ResourceType)));
+                System.Threading.Tasks.Task tt = new System.Threading.Tasks.Task(delegate
+                {
+                    IList<IResourceIndexEntry> lrie =
+                        this.DupsOnly(this.CurrentPackage.FindAll(x => MainForm.stblList.Contains(x.ResourceType)));
+               
+
                 foreach (IResourceIndexEntry dup in lrie)
                 {
                     IList<IResourceIndexEntry> ldups =
@@ -257,9 +261,15 @@ namespace S4PIDemoFE
                         }
                     }
                     this.CurrentPackage.ReplaceResource(newRie, (IResource)newStbl);
-                    this.browserWidget1.Add(newRie, false);
-                }
+                    this.browserWidget1.Invoke(new Action(() => 
+                    {
+                        this.browserWidget1.Add(newRie, false);
+                    }));
 
+                }
+                });
+
+                tt.Start();
                 // Get rid of Sims3Pack resource that sneak in
                 this.CurrentPackage.FindAll(x =>
                                             {
@@ -360,7 +370,7 @@ namespace S4PIDemoFE
 
                     this.lbProgress.Text = "Importing " + Path.GetFileNameWithoutExtension(filename) + "...";
                     Application.DoEvents();
-                    IPackage imppkg;
+                    IPackage imppkg = null;
                     try
                     {
                         imppkg = Package.OpenPackage(0, filename);
@@ -392,6 +402,7 @@ namespace S4PIDemoFE
                     }
                     try
                     {
+
                         List<Tuple<MyDataFormat, DuplicateHandling>> limp =
                             new List<Tuple<MyDataFormat, DuplicateHandling>>();
                         List<IResourceIndexEntry> lrie = selection == null
@@ -399,54 +410,71 @@ namespace S4PIDemoFE
                             : imppkg.FindAll(rie => selection.Any(tgt => ((AResourceKey)tgt).Equals(rie)));
                         this.progressBar1.Value = 0;
                         this.progressBar1.Maximum = lrie.Count;
-                        foreach (IResourceIndexEntry rie in lrie)
+
+
+                        Application.DoEvents();
+
+                        for (int r = 0; r < lrie.Count; r++)
                         {
                             try
                             {
-                                if (rie.ResourceType == 0x0166038C) //NMAP
+                                if (lrie[r].ResourceType == 0x0166038C) //NMAP
                                 {
                                     if (useNames)
                                     {
-                                        this.browserWidget1.MergeNamemap(
-                                            WrapperDealer.GetResource(0, imppkg, rie) as IDictionary<ulong, string>,
-                                            true,
-                                            rename);
+                                        this.browserWidget1.Invoke(new Action(() =>
+                                        {
+                                            this.browserWidget1.MergeNamemap(
+                                              WrapperDealer.GetResource(0, imppkg, lrie[r]) as IDictionary<ulong, string>,
+                                              true,
+                                              rename);
+                                        }));
+                                         
+                                       
+
                                     }
                                 }
                                 else
                                 {
-                                    IResource res = WrapperDealer.GetResource(0, imppkg, rie, true);
-
+                                    //-- this area is doing the heavy lifting.
+                                    Application.DoEvents();
+                                    IResource res = WrapperDealer.GetResource(0, imppkg, lrie[r], true);
                                     MyDataFormat impres = new MyDataFormat()
-                                                          {
-                                                              tgin = rie as AResourceIndexEntry,
-                                                              data = res.AsBytes
-                                                          };
-
+                                    {
+                                        tgin = lrie[r] as AResourceIndexEntry,
+                                        data = res.AsBytes
+                                    };
                                     // dups Replace | Reject | Allow
                                     // dupsList null | list of allowable dup types
                                     DuplicateHandling dupThis =
-                                        dups == DuplicateHandling.Allow
-                                            ? dupsList == null || dupsList.Contains(rie.ResourceType)
-                                                ? DuplicateHandling.Allow
-                                                : DuplicateHandling.Replace
-                                            : dups;
-
+                                            dups == DuplicateHandling.Allow
+                                                ? dupsList == null || dupsList.Contains(lrie[r].ResourceType)
+                                                    ? DuplicateHandling.Allow
+                                                    : DuplicateHandling.Replace
+                                                : dups;
+                                    
                                     limp.Add(Tuple.Create(impres, dupThis));
-                                    this.progressBar1.Value++;
-                                    if (now.AddMilliseconds(100) < DateTime.UtcNow)
+                                    this.progressBar1.Invoke(new Action(() =>
                                     {
-                                        Application.DoEvents();
-                                        now = DateTime.UtcNow;
-                                    }
+                                        //-- apparently showing app is doing something.   
+                                        this.progressBar1.Value++;
+                                        if (now.AddMilliseconds(100) < DateTime.UtcNow)
+                                        {
+                                            Application.DoEvents();
+                                            now = DateTime.UtcNow;
+                                        }
+                                    }));
+                          
                                 }
+
+                       
                             }
                             catch (Exception ex)
                             {
                                 string rk = "";
-                                if (rie != null)
+                                if (lrie[r] != null)
                                 {
-                                    rk = "(RK: " + rie + ")\n";
+                                    rk = "(RK: " + lrie[r] + ")\n";
                                 }
                                 else
                                 {
@@ -458,18 +486,26 @@ namespace S4PIDemoFE
                                     title);
                                 throw new IgnoredException(ex);
                             }
-                        }
-                        this.progressBar1.Value = 0;
 
-                        IEnumerable<IResourceIndexEntry> rieList = limp
-                            .Select(
-                                x =>
-                                    this.NewResource((AResourceKey)x.Item1.tgin,
-                                        new MemoryStream(x.Item1.data),
-                                        x.Item2,
-                                        compress))
-                            .Where(x => x != null);
-                        this.browserWidget1.AddRange(rieList);
+                        }
+
+                        this.progressBar1.Value = 0;
+                   
+                            this.browserWidget1.Invoke(new Action(() =>
+                            {
+                                IEnumerable<IResourceIndexEntry> rieList = limp
+                                .Select(
+                                    x =>
+                                        this.NewResource((AResourceKey)x.Item1.tgin,
+                                            new MemoryStream(x.Item1.data),
+                                            x.Item2,
+                                            compress))
+                                .Where(x => x != null);
+                           
+                                this.browserWidget1.AddRange(rieList);
+                   
+                            }));
+
                     }
                     catch (IgnoredException)
                     {
