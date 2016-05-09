@@ -590,7 +590,17 @@ namespace s4pi.Package
 
         #region Header implementation
         static byte[] stringToBytes(string s) { byte[] bytes = new byte[s.Length]; int i = 0; foreach (char c in s) bytes[i++] = (byte)c; return bytes; }
-        static string bytesToString(byte[] bytes) { string s = ""; foreach (byte b in bytes) s += (char)b; return s; }
+        static string bytesToString(byte[] bytes) {
+
+            string s = "" + (char)bytes[0] + (char)bytes[1] + (char)bytes[2] + (char)bytes[3];
+            /*
+            for (int j = 0; j < bytes.Length; ++j)
+                s += (char)bytes[j - 1];
+            */
+
+            return s;
+            
+        }
 
         const string magic = "DBPF";
         static int[] majors = { 2 };
@@ -610,9 +620,11 @@ namespace s4pi.Package
         {
             if (header.Length != 96)
                 throw new InvalidDataException("Hit unexpected end of file.");
-            //--no need to be function hopping.
-            string s = "";
-            for (int b = 0; b < Magic.Length; b++) { s += (char)Magic[b]; }
+          
+            //-- Optimization.
+            //string s = "";
+            //for (int b = 0; b < Magic.Length; b++) { s += (char)Magic[b]; }
+            string s = bytesToString(Magic);
 
             if (s != magic)
                 throw new InvalidDataException("Expected magic tag '" + magic + "'.  Found '" + s + "'.");
