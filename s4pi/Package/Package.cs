@@ -546,6 +546,8 @@ namespace s4pi.Package
 
         private Package(int requestedVersion, Stream s)
         {
+            //-- optimize
+
             this.requestedApiVersion = requestedVersion;
             packageStream = s;
             s.Position = 0;
@@ -588,7 +590,17 @@ namespace s4pi.Package
 
         #region Header implementation
         static byte[] stringToBytes(string s) { byte[] bytes = new byte[s.Length]; int i = 0; foreach (char c in s) bytes[i++] = (byte)c; return bytes; }
-        static string bytesToString(byte[] bytes) { string s = ""; foreach (byte b in bytes) s += (char)b; return s; }
+        static string bytesToString(byte[] bytes) {
+
+            string s = "" + (char)bytes[0] + (char)bytes[1] + (char)bytes[2] + (char)bytes[3];
+            /*
+            for (int j = 0; j < bytes.Length; ++j)
+                s += (char)bytes[j - 1];
+            */
+
+            return s;
+            
+        }
 
         const string magic = "DBPF";
         static int[] majors = { 2 };
@@ -608,9 +620,14 @@ namespace s4pi.Package
         {
             if (header.Length != 96)
                 throw new InvalidDataException("Hit unexpected end of file.");
+          
+            //-- Optimization.
+            //string s = "";
+            //for (int b = 0; b < Magic.Length; b++) { s += (char)Magic[b]; }
+            string s = bytesToString(Magic);
 
-            if (bytesToString(Magic) != magic)
-                throw new InvalidDataException("Expected magic tag '" + magic + "'.  Found '" + bytesToString(Magic) + "'.");
+            if (s != magic)
+                throw new InvalidDataException("Expected magic tag '" + magic + "'.  Found '" + s + "'.");
 
             if (!majors.Contains(Major))
                 throw new InvalidDataException("Expected major version(s) '" + string.Join(", ", majors) + "'.  Found '" + Major.ToString() + "'.");
@@ -648,13 +665,15 @@ namespace s4pi.Package
         /// <remarks>Used by WrapperDealer to get the data for a resource.</remarks>
         public override Stream GetResource(IResourceIndexEntry rc)
         {
+            
             ResourceIndexEntry rie = rc as ResourceIndexEntry;
+           
             if (rie == null) return null;
             if (rie.ResourceStream != null) return rie.ResourceStream;
-
-            if (rc.Chunkoffset == 0xffffffff) return null;
+            
+            if (rc.Chunkoffset == 0xffffffff) return  null;
             packageStream.Position = rc.Chunkoffset;
-
+            
             byte[] data = null;
             if (rc.Filesize == 1 && rc.Memsize == 0xFFFFFFFF) return null;//{ data = new byte[0]; }
             else if (rc.Filesize == rc.Memsize)
@@ -666,11 +685,13 @@ namespace s4pi.Package
                 data = Compression.UncompressStream(packageStream, (int)rc.Filesize, (int)rc.Memsize);
             }
 
-            MemoryStream ms = new MemoryStream();
-            ms.Write(data, 0, data.Length);
-            ms.Position = 0;
+                MemoryStream ms = new MemoryStream();
+                ms.Write(data, 0, data.Length);
+                ms.Position = 0;
+            
             return ms;
         }
+        
 
     }
 }
