@@ -5,6 +5,7 @@
 0x015A1849  GEOM   .simgeom
 0x0166038C  _KEY   .keyname
 0x01661233  MODL   .model
+0x01942E2C  LOTD   .lotd
 0x01A527DB  _AUD   .snr
 0x01D0E75D  MATD   .material
 0x01D10F34  MLOD   .lod

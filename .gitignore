@@ -219,35 +219,4 @@ UpgradeLog*.htm
 FakesAssemblies/
 
 # Files created by CreateAssemblyVersion pre-build events
-CS System Classes/Properties/AssemblyVersion.cs
-s4pi/Interfaces/Properties/AssemblyVersion.cs
-s4pi/Package/Properties/AssemblyVersion.cs
-s4pi/Settings/Properties/AssemblyVersion.cs
-s4pi/WrapperDealer/Properties/AssemblyVersion.cs
-s4pi Extras/CustomForms/Properties/AssemblyVersion.cs
-s4pi Extras/DDSPanel/Properties/AssemblyVersion.cs
-s4pi Extras/Extensions/Properties/AssemblyVersion.cs
-s4pi Extras/Filetable/Properties/AssemblyVersion.cs
-s4pi Extras/Helpers/Properties/AssemblyVersion.cs
-s4pi Extras/s4piControls/Properties/AssemblyVersion.cs
-s4pi Wrappers/CASPartResource/Properties/AssemblyVersion.cs
-s4pi Wrappers/CatalogResource/Properties/AssemblyVersion.cs
-s4pi Wrappers/ComplateResource/Properties/AssemblyVersion.cs
-s4pi Wrappers/DataResource/Properties/AssemblyVersion.cs
-s4pi Wrappers/DefaultResource/Properties/AssemblyVersion.cs
-s4pi Wrappers/GenericRCOLResource/Properties/AssemblyVersion.cs
-s4pi Wrappers/ImageResource/Properties/AssemblyVersion.cs
-s4pi Wrappers/JazzResource/Properties/AssemblyVersion.cs
-s4pi Wrappers/MeshChunks/Properties/AssemblyVersion.cs
-s4pi Wrappers/MiscellaneousResource/Properties/AssemblyVersion.cs
-s4pi Wrappers/ModularResource/Properties/AssemblyVersion.cs
-s4pi Wrappers/NameMapResource/Properties/AssemblyVersion.cs
-s4pi Wrappers/NGMPHashMapResource/Properties/AssemblyVersion.cs
-s4pi Wrappers/ObjKeyResource/Properties/AssemblyVersion.cs
-s4pi Wrappers/RigResource/Properties/AssemblyVersion.cs
-s4pi Wrappers/s4piRCOLChunks/Properties/AssemblyVersion.cs
-s4pi Wrappers/ScriptResource/Properties/AssemblyVersion.cs
-s4pi Wrappers/StblResource/Properties/AssemblyVersion.cs
-s4pi Wrappers/TextResource/Properties/AssemblyVersion.cs
-s4pi Wrappers/TxtcResource/Properties/AssemblyVersion.cs
-s4pi Wrappers/UserCAStPresetResource/Properties/AssemblyVersion.cs
+**/Properties/AssemblyVersion.cs

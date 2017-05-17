@@ -1,5 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio Express 2013 for Windows Desktop
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreateAssemblyVersion", "s4pi\CreateAssemblyVersion\CreateAssemblyVersion.csproj", "{114622FB-D6BF-4EA7-9BB9-FB06B5A01212}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CS System Classes", "CS System Classes\CS System Classes.csproj", "{00200E76-C245-42A7-B567-5C30EDBCE977}"
@@ -63,6 +65,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "s4pe", "s4pe\s4pe.csproj", 
 		{4C8EEE00-88BB-4A22-BEB2-68245D98CB78} = {4C8EEE00-88BB-4A22-BEB2-68245D98CB78}
 		{38D21F02-C139-43C8-8B74-D84E22B89F50} = {38D21F02-C139-43C8-8B74-D84E22B89F50}
 		{F2E30D04-82C7-487F-B9E8-E8BABB1C94E1} = {F2E30D04-82C7-487F-B9E8-E8BABB1C94E1}
+		{F4E52414-B7CC-4920-9546-0711D5A1F4C9} = {F4E52414-B7CC-4920-9546-0711D5A1F4C9}
 		{3D2A241B-533B-47B5-A8D1-DB3B7953E6A7} = {3D2A241B-533B-47B5-A8D1-DB3B7953E6A7}
 		{513B8C1F-2BE4-46D6-B95D-836A1F36855E} = {513B8C1F-2BE4-46D6-B95D-836A1F36855E}
 		{E8176722-BE4E-47FF-A8A6-BFF4BE7A5DE8} = {E8176722-BE4E-47FF-A8A6-BFF4BE7A5DE8}
@@ -106,6 +109,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThumbnailHelper", "s4pe Helpers\ThumbnailHelper\ThumbnailHelper.csproj", "{EDBE4989-D08B-41A0-BE3C-A68307606DAF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "s4pi.Commons", "s4pi.Resource.Commons\s4pi.Commons\s4pi.Commons.csproj", "{BDAC59C8-3ABF-439F-9C1C-5112CB22F4AD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LotDescriptionResource", "s4pi Wrappers\LotDescriptionResource\LotDescriptionResource.csproj", "{F4E52414-B7CC-4920-9546-0711D5A1F4C9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -527,6 +532,16 @@ Global
 		{BDAC59C8-3ABF-439F-9C1C-5112CB22F4AD}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{BDAC59C8-3ABF-439F-9C1C-5112CB22F4AD}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{BDAC59C8-3ABF-439F-9C1C-5112CB22F4AD}.Release|x86.ActiveCfg = Release|Any CPU
+		{F4E52414-B7CC-4920-9546-0711D5A1F4C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4E52414-B7CC-4920-9546-0711D5A1F4C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4E52414-B7CC-4920-9546-0711D5A1F4C9}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{F4E52414-B7CC-4920-9546-0711D5A1F4C9}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{F4E52414-B7CC-4920-9546-0711D5A1F4C9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F4E52414-B7CC-4920-9546-0711D5A1F4C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4E52414-B7CC-4920-9546-0711D5A1F4C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4E52414-B7CC-4920-9546-0711D5A1F4C9}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{F4E52414-B7CC-4920-9546-0711D5A1F4C9}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{F4E52414-B7CC-4920-9546-0711D5A1F4C9}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
