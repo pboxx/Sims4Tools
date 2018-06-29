@@ -240,6 +240,7 @@ namespace CASPartResource
         BODYTYPE_OCCULT_NECK_SCAR = 1ul << 6
     }
 
+    [Flags]
     public enum ExcludeModifierRegion : ulong        //used in CASP exclude modifier
     {
         Eyes = 1,
