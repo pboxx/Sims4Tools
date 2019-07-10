@@ -48,7 +48,7 @@
 0x0D338A3A  THUM   .png
 0x0E4D15FB  _XML   .xml
 0x0EEB823A  _XML   .xml
-0x105205BA  UNKN   .bnry
+0x105205BA  SPRE   .simpreset
 0x11E72A63  _XML   .xml
 0x122FC66A  _XML   .xml
 0x12496650  _XML   .xml
@@ -118,6 +118,7 @@
 0x48C2D5ED  _XML   .xml
 0x48C75CE3  _XML   .xml
 0x49395302  _XML   .xml
+0x4D5B0931  THUM   .png
 0x4DB8251E  _XML   .xml
 0x4F726BBE  FTPT   .ftpt
 0x4F739CEE  _XML   .xml
@@ -150,7 +151,7 @@
 0x7147A350  _XML   .xml
 0x71A449C9  SKYB   .skyboxtexture
 0x71BDB8A2  STLK   .bnry
-0x729F6C4F  UNKN   .bnry
+0x729F6C4F  HHOL   .householddescription
 0x738E6C56  _XML   .xml
 0x73996BEB  _XML   .xml
 0x73E93EEB  _XML   .manifest
@@ -167,6 +168,7 @@
 0x892C4B8A  UNKN   .bnry
 0x893E429C  _XML   .xml
 0x8B18FF6E  HOTC   .hotspotctrl
+0x8E71065D  THUM   .png
 0x8EAF13DE  _RIG   .grannyrig
 0x8FB3E0B1  _XML   .xml
 0x9063660D  WTXT   .wrldtxtrmap
@@ -204,6 +206,7 @@
 0xB3C438F0  HHBN   .householdbinary
 0xB4F762C9  CFLR   .cflr
 0xB61DE6B4  _XML   .xml
+0xB67673A2  THUM   .png
 0xB6C8B6A0  _IMG   .dds
 0xB734E44F  FTPT   .ftpt
 0xB7FF8F95  _XML   .xml
@@ -220,8 +223,10 @@
 0xBE04173A  _XML   .xml
 0xC020FCAD  _XML   .xml
 0xC0DB5AE7  OBJD   .object
+0xC1ED6D35  THUM   .png
 0xC202C770  _XML   .xml
 0xC2CAA646  _XML   .xml
+0xC4DFAE6D  COAT   .animalcoat
 0xC582D2FB  _XML   .xml
 0xC5F6763E  SMOD   .simmodifier
 0xC71CA490  UNKN   .bnry
@@ -273,6 +278,7 @@
 0xF0633989  UNKN   .bnry
 0xF1EDBD86  CRPT   .roofmatrl
 0xF3ABFF3C  _XML   .xml
+0xF401205D  _XML   .xml
 0xF93B40CF  _XML   .xml
 0xF958A092  _XML   .xml
 0xFA0FFA34  _XML   .xml
