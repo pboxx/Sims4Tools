@@ -1,0 +1,6 @@
+// RLES Mask (Block 4 data) Export
+ResourceType: 0xBA856C78
+Label: Export mask to PNG
+Command: Helpers\RLESMaskHelper\RLESMaskHelper.exe
+Arguments: /export "{}" 
+Desc: Export RLES Mask (Block 4 data) to PNG
