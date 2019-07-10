@@ -72,15 +72,19 @@ namespace s4pi.ImageResource
         public PixelFormat(FourCC fourCC)
         {
             this.fourcc = fourCC;
-            this.pixelFormatFlag = PixelFormatFlags.FourCC;
-            if (this.fourcc == FourCC.DXT5)
+            if (this.fourcc == FourCC.DXT5 || this.fourcc == FourCC.DXT1 || this.fourcc == FourCC.DXT3)
             {
-                this.RGBBitCount = 32;
-                this.redBitMask = 0x00FF0000;
-                this.greenBitMask = 0x0000FF00;
-                this.blueBitMask = 0x000000FF;
-                this.alphaBitMask = 0xFF000000;
+                this.pixelFormatFlag = PixelFormatFlags.FourCC;
             }
+            else if (this.fourcc == FourCC.None)
+            {
+                this.pixelFormatFlag = PixelFormatFlags.RGBA;
+            }
+            this.RGBBitCount = 32;
+            this.redBitMask = 0x00FF0000;
+            this.greenBitMask = 0x0000FF00;
+            this.blueBitMask = 0x000000FF;
+            this.alphaBitMask = 0xFF000000;
         }
 
         public PixelFormat(NotFourCC notFourCC)

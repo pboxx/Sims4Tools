@@ -93,22 +93,47 @@ namespace System.Drawing
                         case DdsFormat.DXT1:
                             flags |= PFFlags.fourCC;
                             fourCC = PFFourCC.dxt1;
+                            rgbBitCount = 32;
+                            aBitMask = 0xff000000;
+                            rBitMask = 0x000000ff;
+                            gBitMask = 0x0000ff00;
+                            bBitMask = 0x00ff0000;
                             break;
                         case DdsFormat.DXT3:
                             flags |= PFFlags.fourCC;
                             fourCC = PFFourCC.dxt3;
+                            rgbBitCount = 32;
+                            aBitMask = 0xff000000;
+                            rBitMask = 0x000000ff;
+                            gBitMask = 0x0000ff00;
+                            bBitMask = 0x00ff0000;
                             break;
                         case DdsFormat.DXT5:
                             flags |= PFFlags.fourCC;
                             fourCC = PFFourCC.dxt5;
+                            rgbBitCount = 32;
+                            aBitMask = 0xff000000;
+                            rBitMask = 0x000000ff;
+                            gBitMask = 0x0000ff00;
+                            bBitMask = 0x00ff0000;
                             break;
                         case DdsFormat.ATI1:
                             flags |= PFFlags.fourCC;
                             fourCC = PFFourCC.ati1;
+                            rgbBitCount = 32;
+                            aBitMask = 0xff000000;
+                            rBitMask = 0x000000ff;
+                            gBitMask = 0x0000ff00;
+                            bBitMask = 0x00ff0000;
                             break;
                         case DdsFormat.ATI2:
                             flags |= PFFlags.fourCC;
                             fourCC = PFFourCC.ati2;
+                            rgbBitCount = 32;
+                            aBitMask = 0xff000000;
+                            rBitMask = 0x000000ff;
+                            gBitMask = 0x0000ff00;
+                            bBitMask = 0x00ff0000;
                             break;
                         case DdsFormat.L8:
                             flags |= PFFlags.luminence;
@@ -312,20 +337,20 @@ namespace System.Drawing
                     w.Write((uint)Flags);
                     w.Write((uint)FourCC);
                     w.Write(RGBBitCount);
-                    if ((Flags & PFFlags.fourCC) != 0)
-                    {
-                        w.Write(0);
-                        w.Write(0);
-                        w.Write(0);
-                        w.Write(0);
-                    }
-                    else
-                    {
+                    //if ((Flags & PFFlags.fourCC) != 0)
+                    //{
+                    //    w.Write(0);
+                    //    w.Write(0);
+                    //    w.Write(0);
+                    //    w.Write(0);
+                    //}
+                    //else
+                    //{
                         w.Write(rBitMask);
                         w.Write(gBitMask);
                         w.Write(bBitMask);
                         w.Write(aBitMask);
-                    }
+                    //}
                 }
 
                 public PFFlags Flags
@@ -369,7 +394,7 @@ namespace System.Drawing
                 public PFFourCC FourCC { get { return (Flags & PFFlags.fourCC) != 0 ? fourCC : 0; } }
 
                 public uint RGBBitCount { get { return (Flags & notFourCC) != 0 ? rgbBitCount : 0; } }
-                
+
                 public uint BlockSize
                 {
                     get
@@ -656,7 +681,7 @@ namespace System.Drawing
                 this.numMipMaps = numberMipMaps;
                 for (int i = 0; i < reserved1.Length; i++) this.reserved1[i] = 0;
                 this.pixelFormat = new DdsPixelFormat(ddsFormat);
-                this.surfaceCaps = DdsSurfaceCaps.texture;
+                this.surfaceCaps = DdsSurfaceCaps.texture | (numMipMaps > 1 ? DdsSurfaceCaps.complex | DdsSurfaceCaps.mipMap : 0);
                 this.cubeMapCaps = 0;
                 this.unusedCaps3 = 0;
                 this.unusedCaps4 = 0;
@@ -755,55 +780,56 @@ namespace System.Drawing
                 }
 
                 numMipMaps = r.ReadUInt32();
-                if ((flags & DdsFlags.mipMapCount) != 0 && numMipMaps != 1)
-                {
-                    Console.WriteLine(String.Format(
-                        "Only simple DDS Textures are supported.  This DDS has {0} mip maps.  At 0x{1:X8}.  Clearing flag and setting count to one..."
-                        , numMipMaps
-                        , s.Position
-                        ));
-                  //  flags &= ~DdsFlags.mipMapCount;
-                 //   numMipMaps = 1;
-                }
-                if ((flags & DdsFlags.mipMapCount) != 0 || numMipMaps == 0)
-                {
-                    Console.WriteLine(String.Format(
-                        "DDS Header invalid.  Inconsistent mipMapCount flag ({0}) and _numMipMaps ({1}).  At 0x{2:X8}.  Clearing flag and setting count to one..."
-                        , flags & DdsFlags.mipMapCount
-                        , numMipMaps
-                        , s.Position
-                        ));
-                 //   flags &= ~DdsFlags.mipMapCount;
-                 //   numMipMaps = 1;
-                }
+                //if ((flags & DdsFlags.mipMapCount) != 0 && numMipMaps > 1)
+                //{
+                    //Console.WriteLine(String.Format(
+                    //    "Only simple DDS Textures are supported.  This DDS has {0} mip maps.  At 0x{1:X8}.  Clearing flag and setting count to one..."
+                    //    , numMipMaps
+                    //    , s.Position
+                    //    ));
+                    //flags &= ~DdsFlags.mipMapCount;
+                    //numMipMaps = 1;
+                //}
+                //if ((flags & DdsFlags.mipMapCount) != 0 || numMipMaps == 0)
+                //{
+                    //Console.WriteLine(String.Format(
+                    //    "DDS Header invalid.  Inconsistent mipMapCount flag ({0}) and _numMipMaps ({1}).  At 0x{2:X8}.  Clearing flag and setting count to one..."
+                    //    , flags & DdsFlags.mipMapCount
+                    //    , numMipMaps
+                    //    , s.Position
+                    //    ));
+                    //flags &= ~DdsFlags.mipMapCount;
+                    //numMipMaps = 1;
+                //}
+                if (numMipMaps == 0) numMipMaps = 1;
 
                 for (int i = 0; i < reserved1.Length; i++) reserved1[i] = r.ReadUInt32();
                 for (int i = 0; i < reserved1.Length; i++) reserved1[i] = 0;
 
                 pixelFormat = new DdsPixelFormat(s);
 
-                var mask = (pixelFormat.FourCC == 0) ? DdsFlags.pitch : DdsFlags.linearSize;
-                var notMask = (pixelFormat.FourCC != 0) ? DdsFlags.pitch : DdsFlags.linearSize;
-                if ((flags & mask) == 0)
-                {
-                    Console.WriteLine(String.Format(
-                        "DDS Header Flags invalid.  {0} not set.  At 0x{1:X8}.  Correcting..."
-                        , mask
-                        , s.Position
-                        ));
-                    flags &= ~notMask;
-                    flags |= mask;
-                }
+                //var mask = (pixelFormat.FourCC == 0) ? DdsFlags.pitch : DdsFlags.linearSize;
+                //var notMask = (pixelFormat.FourCC != 0) ? DdsFlags.pitch : DdsFlags.linearSize;
+                //if ((flags & mask) == 0)
+                //{
+                //    Console.WriteLine(String.Format(
+                //        "DDS Header Flags invalid.  {0} not set.  At 0x{1:X8}.  Correcting..."
+                //        , mask
+                //        , s.Position
+                //        ));
+                //    flags &= ~notMask;
+                //    flags |= mask;
+                //}
 
                 surfaceCaps = (DdsSurfaceCaps)r.ReadUInt32();
                 if ((surfaceCaps & ~DdsSurfaceCaps.texture) != 0)
                 {
-                    Console.WriteLine(String.Format(
-                        "Only simple DDS Textures are supported.  This DDS has other surface capabilities: {0}.  At 0x{1:X8}.  Clearing unsupported capabilities..."
-                        , surfaceCaps
-                        , s.Position
-                        ));
-                    surfaceCaps &= DdsSurfaceCaps.texture;
+                    //Console.WriteLine(String.Format(
+                    //    "Only simple DDS Textures are supported.  This DDS has other surface capabilities: {0}.  At 0x{1:X8}.  Clearing unsupported capabilities..."
+                    //    , surfaceCaps
+                    //    , s.Position
+                    //    ));
+                    //surfaceCaps &= DdsSurfaceCaps.texture;
                 }
                 if (surfaceCaps == 0)
                 {
@@ -840,7 +866,7 @@ namespace System.Drawing
 
                 w.Write((uint)DdsMagic.dds_);//0
                 w.Write((uint)124);//4
-                w.Write((uint)(writeFlags | (IsBlockCompressed ? DdsFlags.linearSize : DdsFlags.pitch)));//8
+                w.Write((uint)(writeFlags | (IsBlockCompressed ? DdsFlags.linearSize : DdsFlags.pitch) | (numMipMaps > 1 ? DdsFlags.mipMapCount : 0)));//8
                 w.Write((uint)height);//12
                 w.Write((uint)width);//16
                 w.Write((uint)(IsBlockCompressed ? CompressedSize : Pitch));//20 ;; CompressedSize is what GIMP DDS plugin puts.
@@ -848,7 +874,7 @@ namespace System.Drawing
                 w.Write(numMipMaps);//28
                 for (int i = 0; i < reserved1.Length; i++) w.Write((uint)0);//32
                 pixelFormat.Write(s);//76
-                w.Write((uint)DdsSurfaceCaps.texture);//108
+                w.Write((uint)(DdsSurfaceCaps.texture | (numMipMaps > 1 ? DdsSurfaceCaps.complex | DdsSurfaceCaps.mipMap : 0)));//108
                 w.Write((uint)0);//112
                 w.Write((uint)0);//116
                 w.Write((uint)0);//120
@@ -859,15 +885,19 @@ namespace System.Drawing
 
             public bool IsBlockCompressed { get { return pixelFormat.FourCC != 0; } }
 
-            uint Pitch { get { return ((width * pixelFormat.RGBBitCount) + 7) / 8; } }
+            public uint Pitch { get { return ((width * pixelFormat.RGBBitCount) + 7) / 8; } }
 
-            uint LinearSize { get { return Math.Max(1, (width + 3) / 4) * pixelFormat.BlockSize; } }
+            public uint LinearSize { get { return Math.Max(1, (width + 3) / 4) * pixelFormat.BlockSize; } }
 
             public uint DataSize { get { return IsBlockCompressed ? CompressedSize : UncompressedSize; } }
 
             public uint NumMipMaps { get { return this.numMipMaps; } }
 
-            uint CompressedSize
+            public uint Width { get { return this.width; } }
+
+            public uint Height { get { return this.height; } }
+
+            public uint CompressedSize
             {
                 get
                 {
@@ -878,7 +908,7 @@ namespace System.Drawing
                 }
             }
 
-            uint UncompressedSize
+            public uint UncompressedSize
             {
                 get
                 {
@@ -886,11 +916,11 @@ namespace System.Drawing
                         throw new InvalidOperationException("DDS is block compressed.");
 
                     // The simple case is to return the pitch supplied by the encoder in good faith
-                    if ((flags & DdsFlags.pitch) != 0)
+                    if ((flags & DdsFlags.pitch) != 0 && pitchOrLinearSize > 0)
                         return pitchOrLinearSize * height;
 
                     // However, some encoders behave badly
-                    if ((flags & DdsFlags.linearSize) != 0)
+                    if ((flags & DdsFlags.linearSize) != 0 && pitchOrLinearSize > 0)
                     {
                         Console.WriteLine("Uncompressed image, pitch flag not set but linear size set.");
                         return pitchOrLinearSize;
@@ -954,6 +984,7 @@ namespace System.Drawing
         DdsHeader header;
         uint[] baseImage; //ARGB uint array
         public uint NumMipMaps { get { return this.header.NumMipMaps; } }
+        public int BaseImageLength { get { return this.baseImage.Length; } }
         #endregion
 
         public Dds(DdsFormat ddsFormat, int width, int height, uint numberMipMaps, uint[] imageData)
@@ -976,58 +1007,149 @@ namespace System.Drawing
 
         public Dds(Stream s)
         {
-            header = new DdsHeader(s);
+            //header = new DdsHeader(s);
 
-            byte[] buffer = new byte[header.DataSize];
-            if (s.Read(buffer, 0, buffer.Length) != buffer.Length)
-                throw new IOException(String.Format("Failed to read DDS data.  At 0x{0:X8}.", s.Position));
+            //byte[] buffer = new byte[header.DataSize];
+            //if (s.Read(buffer, 0, buffer.Length) != buffer.Length)
+            //    throw new IOException(String.Format("Failed to read DDS data.  At 0x{0:X8}.", s.Position));
+
+            //var decoder = header.Decoder;
+            //if (decoder == null)
+            //    throw new FormatException("File is not a supported DDS format");
+
+            //if (header.IsBlockCompressed)
+            //{
+            //    // Decompress
+            //    byte[] pixelData = new byte[0];
+            //    if (header.FileFormat == DdsFormat.ATI1 || header.FileFormat == DdsFormat.ATI2)
+            //    {
+            //        pixelData = DdsSquash.DecompressImage(buffer, (int)header.width, (int)header.height, header.FileFormat);
+            //    }
+            //    else
+            //    {
+            //        pixelData = DdsSquish.DecompressImage(buffer, (int)header.width, (int)header.height, header.SquishFourCC);
+            //    }
+
+            //    // Convert R, G, B, A byte array to ARGB uint array...
+            //    baseImage = new uint[pixelData.Length / sizeof(uint)];
+            //    Enumerable.Range(0, baseImage.Length).AsParallel()
+            //        .ForAll(i => baseImage[i] = decoder(BitConverter.ToUInt32(pixelData, i * sizeof(uint))));
+            //}
+            //else
+            //{
+            //    // Convert encoded data to ARGB uint array
+            //    baseImage = new uint[header.width * header.height];
+            //    int rowPitch = buffer.Length / (int)header.height;
+            //    int pixelSize = (int)header.UncompressedPixelSize;
+            //    Enumerable.Range(0, (int)header.width).AsParallel()
+            //        .ForAll(destX => Enumerable.Range(0, (int)header.height).AsParallel()
+            //            .ForAll(destY =>
+            //            {
+            //                // Compute pixel offsets
+            //                int srcPixelOffset = (destY * rowPitch) + (destX * pixelSize);
+            //                int destPixelOffset = (destY * (int)header.width) + destX;
+
+            //                // Build our pixel colour as a DWORD - parallelism overhead costs too much
+            //                uint pixelColour = 0;
+            //                for (int loop = 0; loop < pixelSize; loop++)
+            //                    pixelColour |= (uint)(buffer[srcPixelOffset + loop] << (8 * loop));
+
+            //                // delegate takes care of calculation
+            //                baseImage[destPixelOffset] = decoder(pixelColour);
+            //            }));
+            //}
+
+            s.Position = 0;
+            header = new DdsHeader(s);
 
             var decoder = header.Decoder;
             if (decoder == null)
                 throw new FormatException("File is not a supported DDS format");
+            int w = (int)header.width;
+            int h = (int)header.height;
+            List<uint> pixels = new List<uint>();
+            uint buffersize = header.DataSize;
+            uint numberMipMaps = Math.Max(header.NumMipMaps, 1);
 
             if (header.IsBlockCompressed)
             {
                 // Decompress
-                byte[] pixelData = new byte[0];
-                if (header.FileFormat == DdsFormat.ATI1 || header.FileFormat == DdsFormat.ATI2)
+                uint minBlockSize;
+                if (header.FileFormat == DdsFormat.ATI1) minBlockSize = 8;
+                else if (header.FileFormat == DdsFormat.ATI2) minBlockSize = 16;
+                else if (header.SquishFourCC == DdsSquish.SquishFlags.kDxt1) minBlockSize = 8;
+                else minBlockSize = 16;
+                for (int m = 0; m < numberMipMaps; m++)
                 {
-                    pixelData = DdsSquash.DecompressImage(buffer, (int)header.width, (int)header.height, header.FileFormat);
-                }
-                else
-                {
-                    pixelData = DdsSquish.DecompressImage(buffer, (int)header.width, (int)header.height, header.SquishFourCC);
-                }
+                    byte[] buffer = new byte[buffersize];
+                    if (s.Read(buffer, 0, buffer.Length) != buffer.Length)
+                        throw new IOException(String.Format("Failed to read DDS data.  At 0x{0:X8}.", s.Position));
 
-                // Convert R, G, B, A byte array to ARGB uint array...
-                baseImage = new uint[pixelData.Length / sizeof(uint)];
-                Enumerable.Range(0, baseImage.Length).AsParallel()
-                    .ForAll(i => baseImage[i] = decoder(BitConverter.ToUInt32(pixelData, i * sizeof(uint))));
+                    byte[] pixelData = new byte[0];
+                    if (header.FileFormat == DdsFormat.ATI1 || header.FileFormat == DdsFormat.ATI2)
+                    {
+                        pixelData = DdsSquash.DecompressImage(buffer, w, h, header.FileFormat);
+                    }
+                    else
+                    {
+                        pixelData = DdsSquish.DecompressImage(buffer, w, h, header.SquishFourCC);
+                    }
+
+                    // Convert R, G, B, A byte array to ARGB uint array...
+                    uint[] tmp = new uint[pixelData.Length / sizeof(uint)];
+                    Enumerable.Range(0, tmp.Length).AsParallel()
+                        .ForAll(i => tmp[i] = decoder(BitConverter.ToUInt32(pixelData, i * sizeof(uint))));
+                    //int index = 0;
+                    //for (int i = 0; i < pixelData.Length; i += 4)
+                    //{
+                    //    tmp[index] = decoder(BitConverter.ToUInt32(pixelData, index));
+                    //    index++;
+                    //}
+                    pixels.AddRange(tmp);
+                    w = Math.Max(w / 2, 1);
+                    h = Math.Max(h / 2, 1);
+                    buffersize = Math.Max(buffersize / 4, minBlockSize);
+                }
+                baseImage = pixels.ToArray();
             }
             else
             {
-                // Convert encoded data to ARGB uint array
-                baseImage = new uint[header.width * header.height];
-                int rowPitch = buffer.Length / (int)header.height;
                 int pixelSize = (int)header.UncompressedPixelSize;
-                Enumerable.Range(0, (int)header.width).AsParallel()
-                    .ForAll(destX => Enumerable.Range(0, (int)header.height).AsParallel()
-                        .ForAll(destY =>
+                // Convert encoded data to ARGB uint array
+                for (int m = 0; m < numberMipMaps; m++)
+                {
+                   // int rowPitch = (int)(buffersize / header.height);
+                    int rowPitch = w * pixelSize;
+                    uint[] tmp = new uint[w * h];
+                    byte[] buffer = new byte[h * rowPitch];
+                    int bufflen = s.Read(buffer, 0, buffer.Length);
+                    if (bufflen != buffer.Length)
+                        throw new IOException(String.Format("Failed to read DDS data. Expected 0x{0:X8} bytes, got 0x{1:X8} bytes.", buffer.Length, bufflen));
+                    for (int destX = 0; destX < w; destX++)
+                   // Enumerable.Range(0, w).AsParallel().ForAll(destX => 
+                    {
+                        for (int destY = 0; destY < h; destY++)
                         {
                             // Compute pixel offsets
                             int srcPixelOffset = (destY * rowPitch) + (destX * pixelSize);
-                            int destPixelOffset = (destY * (int)header.width) + destX;
+                            int destPixelOffset = (destY * w) + destX;
 
                             // Build our pixel colour as a DWORD - parallelism overhead costs too much
                             uint pixelColour = 0;
-                            for (int loop = 0; loop < pixelSize; loop++)
-                                pixelColour |= (uint)(buffer[srcPixelOffset + loop] << (8 * loop));
+                                for (int loop = 0; loop < pixelSize; loop++)
+                                    pixelColour |= (uint)(buffer[srcPixelOffset + loop] << (8 * loop));
 
                             // delegate takes care of calculation
-                            baseImage[destPixelOffset] = decoder(pixelColour);
-                        }));
+                            tmp[destPixelOffset] = decoder(pixelColour);
+                        }
+                    }
+                    pixels.AddRange(tmp);
+                    w = Math.Max(w / 2, 1);
+                    h = Math.Max(h / 2, 1);
+                  //  buffersize = Math.Max(buffersize / 4, (uint)pixelSize);
+                }
+                baseImage = pixels.ToArray();
             }
-
         }
 
         public void Write(Stream s)
@@ -1074,30 +1196,32 @@ namespace System.Drawing
             }
             else
             {
+                int pixelSize = (int)header.UncompressedPixelSize;
                 for (int m = 0; m < NumMipMaps; m++)
                 {
-                    int pixelSize = (int)header.UncompressedPixelSize;
                     int rowPitch = w * pixelSize;
                     int mipLength = w * h;
                     uint[] imageData = new uint[mipLength];
                     Array.Copy(baseImage, mipOffset, imageData, 0, mipLength);
                     buffer = new byte[rowPitch * h];
                     //   int rowPitch = buffer.Length / (int)header.height;
-                    Enumerable.Range(0, (int)header.width).AsParallel()
-                        .ForAll(srcX => Enumerable.Range(0, (int)header.height).AsParallel()
-                            .ForAll(srcY =>
-                            {
-                                // Compute pixel offsets
-                                int destPixelOffset = (srcY * rowPitch) + (srcX * pixelSize);
-                                int srcPixelOffset = (srcY * (int)header.width) + srcX;
+                    for (int srcX = 0; srcX < w; srcX++)
+                    //Enumerable.Range(0, w).AsParallel().ForAll(srcX =>
+                    {
+                        for (int srcY = 0; srcY < h; srcY++)
+                        {
+                            // Compute pixel offsets
+                            int destPixelOffset = (srcY * rowPitch) + (srcX * pixelSize);
+                            int srcPixelOffset = (srcY * w) + srcX;
 
-                                // delegate takes care of calculation
-                                uint pixelColour = encoder(imageData[destPixelOffset]);
+                            // delegate takes care of calculation
+                            uint pixelColour = encoder(imageData[srcPixelOffset]);
 
-                                // Store each computed byte - parallelism overhead costs too much
-                                for (int loop = 0; loop < pixelSize; loop++)
-                                    buffer[destPixelOffset + loop] = (byte)((pixelColour >> (8 * loop)) & 0xff);
-                            }));
+                            // Store each computed byte - parallelism overhead costs too much
+                            for (int loop = 0; loop < pixelSize; loop++)
+                                buffer[destPixelOffset + loop] = (byte)((pixelColour >> (8 * loop)) & 0xff);
+                        }
+                    }
                     output.AddRange(buffer);
                     w = Math.Max(w / 2, 1);
                     h = Math.Max(h / 2, 1);
@@ -1135,7 +1259,6 @@ namespace System.Drawing
         bool useDXTCompression = false;
         bool useATICompression = false;
         bool useLuminence = false;
-        bool createMipMaps = false;
         int luminenceMode = 0;
         int alphaDepth = 0;
         int atiMode = 0;
@@ -1248,6 +1371,7 @@ namespace System.Drawing
             this.luminenceMode = image.luminenceMode;
             this.alphaDepth = image.alphaDepth;
             this.atiMode = image.atiMode;
+            this.numMipMaps = image.numMipMaps;
 
             this.baseImage = (uint[])image.currentImage.Clone();
 
@@ -1256,7 +1380,7 @@ namespace System.Drawing
         }
 
         /// <summary>
-        /// Creates an image from a given <see cref="T:DdsFile"/>, resized as requested.
+        /// Creates an image from a given <see cref="T:DdsFile"/>, resized as requested. Does not generate mipmaps.
         /// If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
         /// </summary>
         /// <param name="image"><see cref="T:DdsFile"/> to clone.</param>
@@ -1300,9 +1424,9 @@ namespace System.Drawing
                 // Clone the image, strip the alpha, then resize
                 using (DdsFile ddsFileBase = new DdsFile())
                 {
-                    ddsFileBase.CreateImage(image, false);
-                    ddsFileBase.DeleteAlphaChannel();
-                    this.baseImage = new Bitmap(ddsFileBase.Image, width, height).ToARGBData();
+                   ddsFileBase.CreateImage(image, false);
+                   ddsFileBase.DeleteAlphaChannel();
+                   this.baseImage = new Bitmap(ddsFileBase.Image, width, height).ToARGBData();
                 }
 
                 this.currentImage = (uint[])this.baseImage.Clone();
@@ -1316,7 +1440,7 @@ namespace System.Drawing
         }
 
         /// <summary>
-        /// Creates an image from a given <see cref="T:Image"/>.
+        /// Creates an image from a given <see cref="T:Image"/>. Does not generate mipmaps.
         /// If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
         /// DXT compression is set to true, ATI compression is set false.
         /// </summary>
@@ -1325,7 +1449,7 @@ namespace System.Drawing
         public void CreateImage(Image image, bool supportHSV) { CreateImage(new Bitmap(image), supportHSV); }
 
         /// <summary>
-        /// Creates an image from a given <see cref="T:Bitmap"/>.
+        /// Creates an image from a given <see cref="T:Bitmap"/>. Does not generate mipmaps.
         /// If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
         /// DXT compression is set to true, ATI compression is set false.
         /// </summary>
@@ -1340,6 +1464,7 @@ namespace System.Drawing
             this.useLuminence = false;
             this.alphaDepth = 5;
             this.atiMode = 0;
+            this.numMipMaps = 1;
 
             this.baseImage = image.ToARGBData();
 
@@ -1370,13 +1495,14 @@ namespace System.Drawing
         /// </summary>
         public void GenerateMipMaps()
         {
-            Bitmap image = this.Image;
-            int h = image.Height;
-            int w = image.Width;
+            int h = this.height;
+            int w = this.width;
             uint[] tmp = new uint[w * h];
             Array.Copy(this.baseImage, tmp, w * h);
             List<uint> imageData = new List<uint>(tmp);
-            Bitmap mip = new Bitmap(image);
+            tmp = null;
+            Bitmap alpha = this.GetGreyscaleFromAlpha();
+            Bitmap image = this.GetOpaqueImage();
             uint mipCounter = 1;
             while (h > 1 || w > 1)
             {
@@ -1384,14 +1510,78 @@ namespace System.Drawing
                 w = Math.Max(w / 2, 1);
                 //if (Math.IEEERemainder(h, 4) > 0 || Math.IEEERemainder(w, 4) > 0) 
                 //    throw new NotSupportedException("Dimensions of all DDS mipmap levels must be multiples of 4. Current mipmap dimensions: " + w.ToString() + "x" + h.ToString());
-                mip = new Bitmap(mip, w, h);
+                // mip = new Bitmap(mip, w, h);
+                Bitmap mip = new Bitmap(w, h, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                using (var g = Graphics.FromImage(mip))
+                {
+                    g.PixelOffsetMode = Drawing2D.PixelOffsetMode.HighQuality;
+                    g.CompositingMode = Drawing2D.CompositingMode.SourceCopy;
+                    g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBilinear;
+                    g.DrawImage(image, new Rectangle(0, 0, w, h));
+                    g.Save();
+                }
+                Bitmap mipAlpha = new Bitmap(w, h, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                using (var g = Graphics.FromImage(mipAlpha))
+                {
+                    g.PixelOffsetMode = Drawing2D.PixelOffsetMode.HighQuality;
+                    g.CompositingMode = Drawing2D.CompositingMode.SourceCopy;
+                    g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBilinear;
+                    g.DrawImage(alpha, new Rectangle(0, 0, w, h));
+                    g.Save();
+                }
+                mip = mip.SetAlphaFromImage(mipAlpha);
+              
                 imageData.AddRange(mip.ToARGBData());
                 mipCounter++;
+                mip.Dispose();
+                mipAlpha.Dispose();
             }
+            this.numMipMaps = mipCounter;
             this.baseImage = imageData.ToArray();
+            imageData = null;
             this.currentImage = (uint[])this.baseImage.Clone();
             if (this.SupportsHSV) this.UpdateHSVData();
-            this.numMipMaps = mipCounter;
+        }
+
+        /// <summary>
+        /// Add bitmap as the top/main mipmap
+        /// </summary>
+        /// <param name="image">Bitmap image to use as the top mipmap</param>
+        public void AddMipMap(Bitmap image)
+        {
+            int h = image.Height;
+            int w = image.Width;
+            if (w != 2 * this.width || h != 2 * this.height)
+                throw new NotSupportedException("Dimensions of added mipmap must be twice current dimensions - current: " +
+                    this.width.ToString() + "x" + this.height.ToString() + "new: " + w.ToString() + "x" + h.ToString());
+            uint[] imageData = new uint[(w * h) + this.baseImage.Length];
+            Array.Copy(image.ToARGBData(), 0, imageData, 0, w * h);
+            Array.Copy(this.baseImage, 0, imageData, w * h, this.baseImage.Length);
+        //    List<uint> imageData = new List<uint>(image.ToARGBData());
+        //    imageData.AddRange(this.baseImage);
+            this.width = w;
+            this.height = h;
+            this.numMipMaps++;
+            this.baseImage = imageData;
+            this.currentImage = (uint[])this.baseImage.Clone();
+            if (this.SupportsHSV) this.UpdateHSVData();
+        }
+
+        /// <summary>
+        /// Removes the main mipmap, halving the dimensions
+        /// </summary>
+        public void RemoveMipMap()
+        {
+            if (this.numMipMaps <= 1) throw new NotSupportedException("Image must have more than one mipmap in order to remove the top one!");
+            int topmiplen = this.width * this.height;
+            uint[] tmp = new uint[this.baseImage.Length - topmiplen];
+            Array.Copy(this.baseImage, topmiplen, tmp, 0, tmp.Length);
+            this.numMipMaps--;
+            this.width = this.width / 2;
+            this.height = this.height / 2;
+            this.baseImage = tmp;
+            this.currentImage = (uint[])this.baseImage.Clone();
+            if (this.SupportsHSV) this.UpdateHSVData();
         }
 
         #region File I/O
@@ -1484,6 +1674,9 @@ namespace System.Drawing
         /// The image size.
         /// </summary>
         public Size Size { get { return new Size(width, height); } }
+
+        public int Height { get { return this.height; } }
+        public int Width { get { return this.width; } }
 
         /// <summary>
         /// Get a new DdsFile of the given size based on the current image.
@@ -1591,7 +1784,7 @@ namespace System.Drawing
         /// Value is used when saving a DDS.
         /// Invalid values may cause exceptions at that point.
         /// </remarks>
-        public uint MipMaps { get { return this.numMipMaps; } }
+        public uint MipMaps { get { return this.numMipMaps; } set { this.numMipMaps = value; } }
 
 
         #region Set Alpha channel
@@ -1639,13 +1832,35 @@ namespace System.Drawing
         {
             AlphaDepth = UseDXT ? 5 : 8;
 
+            //SetPixels((x, y, value) =>
+            //{
+            //    uint alpha;
+            //    lock (image)
+            //    {
+            //        Color srcValue = image.GetPixel(x % image.Width, y % image.Height);
+            //        alpha = ((uint)(srcValue.R + srcValue.G + srcValue.B) / 3) & 0xff;
+            //    }
+
+            //    return (value & 0x00FFFFFF) | (alpha << 24);
+            //});
+
+            // Alpha image
+            Rectangle rectA = new Rectangle(0, 0, image.Width, image.Height);
+            System.Drawing.Imaging.BitmapData bmpDataA = image.LockBits(rectA, System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            int alphaWidth = Math.Abs(bmpDataA.Stride);
+            byte[] alphaValues = new byte[alphaWidth * bmpDataA.Height];
+            for (int i = 0; i < bmpDataA.Height; i++)
+            {
+                System.Runtime.InteropServices.Marshal.Copy(IntPtr.Add(bmpDataA.Scan0, i * bmpDataA.Stride), alphaValues, i * alphaWidth, alphaWidth);
+            }
+            image.UnlockBits(bmpDataA);
             SetPixels((x, y, value) =>
             {
                 uint alpha;
-                lock (image)
+                lock (alphaValues)
                 {
-                    Color srcValue = image.GetPixel(x % image.Width, y % image.Height);
-                    alpha = ((uint)(srcValue.R + srcValue.G + srcValue.B) / 3) & 0xff;
+                    int srcIndex = (y * alphaWidth) + x;
+                    alpha = ((uint)(alphaValues[srcIndex] + alphaValues[srcIndex + 1] + alphaValues[srcIndex + 2]) / 3) & 0xff;
                 }
 
                 return (value & 0x00FFFFFF) | (alpha << 24);
@@ -1674,11 +1889,66 @@ namespace System.Drawing
         /// <returns>A greyscale image representing the alpha channel of the current image.</returns>
         public Bitmap GetGreyscaleFromAlpha()
         {
-            uint[] greyscale = new uint[currentImage.Length];
+            uint mask = 0xFF000000U;
+            uint[] sourcePixels = SupportsHSV && !hsvShift.IsEmpty ? ColorHSVA.ToArrayARGB(hsvData, hsvShift) : currentImage;
+            byte[] destPixels;
 
-            DoAction((x, y, value) => greyscale[x + y * width] = ((uint)0xFF << 24) | value.A() << 16 | value.A() << 8 | value.A() << 0);
+            destPixels = new byte[width * height * 4];
 
-            return greyscale.ToBitmap(this.Size);
+            for (int y = 0; y < height; y++)
+            {
+                int offset = y * width;
+                for (int x = 0; x < width; x++)
+                    {
+                        byte alpha = (byte)((sourcePixels[offset + x] & mask) >> 24);
+                        int index = (offset + x) * 4;
+                        destPixels[index] = alpha;
+                        destPixels[index + 1] = alpha;
+                        destPixels[index + 2] = alpha;
+                        destPixels[index + 3] = 255;
+                    }
+            }
+
+            Bitmap bitmap = new Bitmap(width, height, Imaging.PixelFormat.Format32bppArgb);
+            System.Drawing.Imaging.BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), Imaging.ImageLockMode.WriteOnly, bitmap.PixelFormat);
+            System.Runtime.InteropServices.Marshal.Copy(destPixels, 0, bmpData.Scan0, destPixels.Length);
+            bitmap.UnlockBits(bmpData);
+
+            return bitmap;
+        }
+
+        /// <summary>
+        /// Returns image bitmap with alpha set to fully opaque
+        /// </summary>
+        /// <returns></returns>
+        public Bitmap GetOpaqueImage()
+        {
+            uint mask = 0x00FFFFFFu;
+            uint[] sourcePixels = SupportsHSV && !hsvShift.IsEmpty ? ColorHSVA.ToArrayARGB(hsvData, hsvShift) : currentImage;
+            byte[] destPixels;
+
+            destPixels = new byte[width * height * 4];
+
+            for (int y = 0; y < height; y++)
+            {
+                int offset = y * width;
+                for (int x = 0; x < width; x++)
+                    {
+                        uint pixel = sourcePixels[offset + x] & mask;
+                        int index = (offset + x) * 4;
+                        destPixels[index] = (byte)(pixel & 0x000000FFu);
+                        destPixels[index + 1] = (byte)((pixel & 0x0000FF00u) >> 8);
+                        destPixels[index + 2] = (byte)((pixel & 0x00FF0000u) >> 16);
+                        destPixels[index + 3] = 255;
+                    }
+            }
+
+            Bitmap bitmap = new Bitmap(width, height, Imaging.PixelFormat.Format32bppArgb);
+            System.Drawing.Imaging.BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), Imaging.ImageLockMode.WriteOnly, bitmap.PixelFormat);
+            System.Runtime.InteropServices.Marshal.Copy(destPixels, 0, bmpData.Scan0, destPixels.Length);
+            bitmap.UnlockBits(bmpData);
+
+            return bitmap;
         }
         #endregion
 
@@ -1702,35 +1972,52 @@ namespace System.Drawing
         {
             uint mask = (alpha ? (uint)0xFF000000 : 0) | (red ? (uint)0x00FF0000 : 0) | (green ? (uint)0x0000FF00 : 0) | (blue ? (uint)0x000000FF : 0);
             uint[] sourcePixels = SupportsHSV && !hsvShift.IsEmpty ? ColorHSVA.ToArrayARGB(hsvData, hsvShift) : currentImage;
-            uint[] destPixels;
+            byte[] destPixels;
 
             if (!red || !green || !blue || !alpha || invert)
             {
-                destPixels = new uint[sourcePixels.Length];
+                destPixels = new byte[width * height * 4];
 
-                Enumerable.Range(0, height).AsParallel()
-                    .ForAll(y =>
+                for (int y = 0; y < height; y++)
                     {
                         int offset = y * width;
-                        Enumerable.Range(0, width).AsParallel()
-                            .ForAll(x =>
+                        for (int x = 0; x < width; x++)
                             {
                                 uint pixel = sourcePixels[offset + x] & mask;
                                 if (alpha) { if (invert) pixel = (pixel & 0x00FFFFFF) | ((255 - pixel.A()) << 24); }
                                 else pixel |= 0xFF000000;
 
-                                destPixels[offset + x] = pixel;
-                            });
-                    });
+                                int index = (offset + x) * 4;
+                                destPixels[index] = (byte)(pixel & 0x000000FFu);
+                                destPixels[index + 1] = (byte)((pixel & 0x0000FF00u) >> 8);
+                                destPixels[index + 2] = (byte)((pixel & 0x00FF0000u) >> 16);
+                                destPixels[index + 3] = (byte)((pixel & 0xFF000000u) >> 24);
+                            }
+                    }
             }
             else
-                destPixels = sourcePixels;
+            {
+                destPixels = new byte[width * height * 4];
 
-            System.Runtime.InteropServices.GCHandle g =
-                System.Runtime.InteropServices.GCHandle.Alloc(destPixels, Runtime.InteropServices.GCHandleType.Pinned);
-            IntPtr p_data = g.AddrOfPinnedObject();
-            Bitmap bitmap = new Bitmap(width, height, width * sizeof(uint), alpha ? Imaging.PixelFormat.Format32bppArgb : Imaging.PixelFormat.Format32bppRgb, p_data);
-            g.Free();
+                for (int y = 0; y < height; y++)
+                {
+                    int offset = y * width;
+                    for (int x = 0; x < width; x++)
+                        {
+                            uint pixel = sourcePixels[offset + x];
+                            int index = (offset + x) * 4;
+                            destPixels[index] = (byte)(pixel & 0x000000FFu);
+                            destPixels[index + 1] = (byte)((pixel & 0x0000FF00u) >> 8);
+                            destPixels[index + 2] = (byte)((pixel & 0x00FF0000u) >> 16);
+                            destPixels[index + 3] = (byte)((pixel & 0xFF000000u) >> 24);
+                        }
+                }
+            }
+
+            Bitmap bitmap = new Bitmap(width, height, Imaging.PixelFormat.Format32bppArgb);
+            System.Drawing.Imaging.BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), Imaging.ImageLockMode.WriteOnly, bitmap.PixelFormat);
+            System.Runtime.InteropServices.Marshal.Copy(destPixels, 0, bmpData.Scan0, destPixels.Length);
+            bitmap.UnlockBits(bmpData);
 
             return bitmap;
         }
@@ -1762,9 +2049,13 @@ namespace System.Drawing
         /// <param name="action">An action taking <c>x</c>, <c>y</c> and <c>pixel</c> parameters.</param>
         public void DoAction(Action<int, int, uint> action)
         {
-            Enumerable.Range(0, width).AsParallel()
-                .ForAll(x => Enumerable.Range(0, height).AsParallel()
-                    .ForAll(y => action(x, y, GetPixel(x, y))));
+            for (int y = 0; y < height; y++) 
+            {
+                for (int x = 0; x < width; x++) 
+                {
+                    action(x, y, GetPixel(x, y));
+                }
+            }
         }
 
         private uint GetPixel(int x, int y) { return currentImage[y * width + x]; }
@@ -2051,25 +2342,96 @@ namespace System.Drawing
         /// </summary>
         /// <param name="bitmap">The bitmap image to encode.</param>
         /// <returns>An array of UInt32 ARGB elements.</returns>
-        public static uint[] ToARGBData(this Bitmap bitmap) { return bitmap.ToPixelData(x => (uint)x.ToArgb()); }
+        // public static uint[] ToARGBData(this Bitmap bitmap) { return bitmap.ToPixelData(x => (uint)x.ToArgb()); }
+        public static uint[] ToARGBData(this Bitmap bitmap) { return bitmap.ToPixelData(); }
 
         /// <summary>
         /// Converts a <see cref="T:Bitmap"/> into a pixel data array,
         /// using the provided encoder.
         /// </summary>
         /// <param name="bitmap">The bitmap image to encode.</param>
-        /// <param name="encoder">The method to invoke to encode bitmap <see cref="T:Color"/> pixels.</param>
         /// <returns>An array of uint elements containing the encoded pixel data.</returns>
-        public static uint[] ToPixelData(this Bitmap bitmap, Func<Color, uint> encoder)
+        // public static uint[] ToPixelData(this Bitmap bitmap, Func<Color, uint> encoder)
+        public static uint[] ToPixelData(this Bitmap bitmap)
         {
             uint[] pixelData = new uint[bitmap.Width * bitmap.Height];
-            for (int y = 0; y < bitmap.Height; y++)
+            Rectangle rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+            System.Drawing.Imaging.BitmapData bmpData = bitmap.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            int rowSize = Math.Abs(bmpData.Stride);
+            int numBytes = rowSize * bmpData.Height;
+            byte[] colors = new byte[numBytes];
+            // Copy the ARGB values to data array
+            for (int y = 0; y < bmpData.Height; y++)
             {
-                int offset = y * bitmap.Width;
-                for (int x = 0; x < bitmap.Width; x++)
-                    pixelData[offset + x] = encoder(bitmap.GetPixel(x, y));
+                System.Runtime.InteropServices.Marshal.Copy(IntPtr.Add(bmpData.Scan0, y * bmpData.Stride), colors, y * rowSize, rowSize);
             }
+            int counter = 0;
+            for (int i = 0; i < colors.Length; i += 4)
+            {
+                pixelData[counter] = BitConverter.ToUInt32(colors, i);
+                counter++;
+            }
+            bitmap.UnlockBits(bmpData);
+            //for (int y = 0; y < bitmap.Height; y++)
+            //{
+            //    int offset = y * bitmap.Width;
+            //    for (int x = 0; x < bitmap.Width; x++)
+            //        pixelData[offset + x] = encoder(bitmap.GetPixel(x, y));
+            //}
             return pixelData;
+        }
+
+        /// <summary>
+        /// Sets alpha image as alpha channel
+        /// </summary>
+        /// <param name="bitmap">Bitmap to receive alpha</param>
+        /// <param name="alpha">Image of alpha</param>
+        /// <returns></returns>
+        public static Bitmap SetAlphaFromImage(this Bitmap bitmap, Bitmap alpha)
+        {
+            if (bitmap.Width != alpha.Width || bitmap.Height != alpha.Height) throw new InvalidDataException("Base Image and alpha image dimensions do not match");
+
+            Rectangle rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+            System.Drawing.Imaging.BitmapData bmpData = bitmap.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+            // Alpha image
+            Rectangle rectA = new Rectangle(0, 0, alpha.Width, alpha.Height);
+            System.Drawing.Imaging.BitmapData bmpDataA = alpha.LockBits(rectA, System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+            int numBytes = Math.Abs(bmpData.Stride) * bmpData.Height;
+            int numBytesA = Math.Abs(bmpDataA.Stride) * bmpDataA.Height;
+
+            byte[] argbValues = new byte[numBytes];
+            byte[] alphaValues = new byte[numBytesA];
+
+            int rgbWidth = Math.Abs(bmpData.Stride);
+            int alphaWidth = Math.Abs(bmpDataA.Stride);
+
+            if (bmpData.Height != bmpDataA.Height)
+            {
+                throw new ApplicationException("Alpha and RGB heights do not match in SetAlphaFromImage: Alpha: " + bmpDataA.Height.ToString() + " RGB: " + bmpData.Height.ToString());
+            }
+
+            // Copy values into arrays
+            for (int i = 0; i < bmpData.Height; i++)
+            {
+                System.Runtime.InteropServices.Marshal.Copy(IntPtr.Add(bmpData.Scan0, i * bmpData.Stride), argbValues, i * rgbWidth, rgbWidth);
+                System.Runtime.InteropServices.Marshal.Copy(IntPtr.Add(bmpDataA.Scan0, i * bmpDataA.Stride), alphaValues, i * alphaWidth, alphaWidth);
+            }
+
+            for (int i = 0; i < numBytes; i += 4)
+            {
+                argbValues[i + 3] = (byte)((alphaValues[i] + alphaValues[i + 1] + alphaValues[i + 2]) / 3);    //copy resized grayscale alpha to rgb
+            }
+
+            for (int i = 0; i < bmpData.Height; i++)
+            {
+                System.Runtime.InteropServices.Marshal.Copy(argbValues, i * rgbWidth, IntPtr.Add(bmpData.Scan0, i * bmpData.Stride), rgbWidth);
+            }
+            bitmap.UnlockBits(bmpData);
+            alpha.UnlockBits(bmpDataA);
+
+            return bitmap;
         }
 
         /// <summary>
