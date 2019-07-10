@@ -64,9 +64,16 @@ namespace s4pi.Animation
 
     public class ClipEventParent : ClipEvent
     {
+        private uint id;
         private byte[] data;
 
         [ElementPriority(4)]
+        public uint NameSpaceHash
+        {
+            get { return id; }
+            set { if (this.id != value) { this.id = value; OnElementChanged(); } }
+        }
+        [ElementPriority(5)]
         public byte[] Data
         {
             get { return data; }
@@ -75,7 +82,7 @@ namespace s4pi.Animation
 
         protected override uint typeSize
         {
-            get { return (uint)this.data.Length; }
+            get { return 4 + (uint)this.data.Length; }
         }
 
         protected override bool isEqual(ClipEvent other)
@@ -83,7 +90,7 @@ namespace s4pi.Animation
             if (other is ClipEventParent)
             {
                 ClipEventParent f = other as ClipEventParent;
-                return data.SequenceEqual(f.data);
+                return this.id == f.id && data.SequenceEqual(f.data);
             }
             else
             {
@@ -99,12 +106,13 @@ namespace s4pi.Animation
         public ClipEventParent(int apiVersion, EventHandler handler, ClipEventType typeId, uint size)
             : base(apiVersion, handler, typeId)
         {
-            this.data = new byte[size - 12];
+            this.data = new byte[size - 12 - 4];
         }
 
         public ClipEventParent(int apiVersion, EventHandler handler, ClipEventParent basis)
             : base(apiVersion, handler, basis)
         {
+            this.id = basis.id;
             this.data = new byte[basis.data.Length];
             Array.Copy(basis.data, this.data, basis.data.Length);
         }
@@ -112,12 +120,14 @@ namespace s4pi.Animation
         protected override void ReadTypeData(Stream ms)
         {
             var br = new BinaryReader(ms);
+            this.id = br.ReadUInt32();
             br.Read(this.data, 0, this.data.Length);
         }
 
         protected override void WriteTypeData(Stream ms)
         {
             var bw = new BinaryWriter(ms);
+            bw.Write(this.id);
             ms.Write(this.data, 0, this.data.Length);
         }
     }
@@ -315,18 +325,26 @@ namespace s4pi.Animation
 
     public class ClipEventVisibility : ClipEvent
     {
-        private byte[] data;
+        private uint id;
+        private byte visible;
 
         [ElementPriority(4)]
-        public byte[] Data
+        public uint NameSpaceHash
         {
-            get { return data; }
-            set { if (this.data != value) { this.data = value; OnElementChanged(); } }
+            get { return id; }
+            set { if (this.id != value) { this.id = value; OnElementChanged(); } }
+        }
+
+        [ElementPriority(5)]
+        public byte Visible
+        {
+            get { return visible; }
+            set { if (this.visible != value) { this.visible = value; OnElementChanged(); } }
         }
 
         protected override uint typeSize
         {
-            get { return (uint)this.data.Length; }
+            get { return 5; }
         }
 
         protected override bool isEqual(ClipEvent other)
@@ -334,7 +352,7 @@ namespace s4pi.Animation
             if (other is ClipEventVisibility)
             {
                 ClipEventVisibility f = other as ClipEventVisibility;
-                return Enumerable.SequenceEqual(this.data, f.data);
+                return this.id == f.id && this.visible == f.visible;
             }
             else
             {
@@ -349,22 +367,81 @@ namespace s4pi.Animation
         public ClipEventVisibility(int apiVersion, EventHandler handler, ClipEventType typeId, uint size)
             : base(apiVersion, handler, typeId)
         {
-            this.data = new byte[size - 12];
         }
         public ClipEventVisibility(int apiVersion, EventHandler handler, ClipEventVisibility basis)
             : base(apiVersion, handler, basis)
         {
-            this.data = new byte[basis.data.Length];
-            Array.Copy(basis.data, this.data, basis.data.Length);
+            this.id = basis.id;
+            this.visible = basis.visible;
         }
 
         protected override void ReadTypeData(Stream ms)
         {
-            ms.Read(this.data, 0, this.data.Length);
+            BinaryReader br = new BinaryReader(ms);
+            this.id = br.ReadUInt32();
+            this.visible = br.ReadByte();
         }
         protected override void WriteTypeData(Stream ms)
         {
-            ms.Write(this.data, 0, this.data.Length);
+            BinaryWriter bw = new BinaryWriter(ms);
+            bw.Write(this.id);
+            bw.Write(this.visible);
+        }
+    }
+
+    public class ClipEventDestroyProp : ClipEvent
+    {
+        private uint id;
+
+        [ElementPriority(4)]
+        public uint NameSpaceHash
+        {
+            get { return id; }
+            set { if (this.id != value) { this.id = value; OnElementChanged(); } }
+        }
+
+        protected override uint typeSize
+        {
+            get { return 4; }
+        }
+
+        protected override bool isEqual(ClipEvent other)
+        {
+            if (other is ClipEventDestroyProp)
+            {
+                ClipEventDestroyProp f = other as ClipEventDestroyProp;
+                return this.id == f.id;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public ClipEventDestroyProp(int apiVersion, EventHandler handler)
+            : this(apiVersion, handler, ClipEventType.DESTROY_PROP, 12 + 4)
+        {
+        }
+        public ClipEventDestroyProp(int apiVersion, EventHandler handler, ClipEventType typeId, uint size)
+            : base(apiVersion, handler, typeId)
+        {
+            
+        }
+        public ClipEventDestroyProp(int apiVersion, EventHandler handler, ClipEventDestroyProp basis)
+            : base(apiVersion, handler, basis)
+        {
+            this.id = basis.id;
+        }
+
+        protected override void ReadTypeData(Stream ms)
+        {
+            BinaryReader br = new BinaryReader(ms);
+            this.id = br.ReadUInt32();
+        }
+        protected override void WriteTypeData(Stream ms)
+        {
+            BinaryWriter bw = new BinaryWriter(ms);
+            bw.Write(this.id);
         }
     }
 
@@ -1429,10 +1506,10 @@ namespace s4pi.Animation
 
     public class ClipEventUnknown : ClipEvent
     {
-        private List<byte> data;
+        private byte[] data;
 
         [ElementPriority(4)]
-        public List<byte> Data
+        public byte[] Data
         {
             get { return data; }
             set { if (this.data != value) { this.data = value; OnElementChanged(); } }
@@ -1440,7 +1517,7 @@ namespace s4pi.Animation
 
         protected override uint typeSize
         {
-            get { return (uint)this.data.Count; }
+            get { return (uint)this.data.Length; }
         }
 
         protected override bool isEqual(ClipEvent other)
@@ -1463,18 +1540,18 @@ namespace s4pi.Animation
         public ClipEventUnknown(int apiVersion, EventHandler handler, ClipEventType typeId, uint size)
             : base(apiVersion, handler, typeId)
         {
-            this.data = new List<byte>((int)size - 12);
+            this.data = new byte[(int)size - 12];
         }
 
         protected override void ReadTypeData(Stream ms)
         {
             BinaryReader br = new BinaryReader(ms);
-            for (int i = 0; i < this.data.Count; i++) this.data[i] = br.ReadByte();
+            for (int i = 0; i < this.data.Length; i++) this.data[i] = br.ReadByte();
         }
         protected override void WriteTypeData(Stream ms)
         {
             BinaryWriter bw = new BinaryWriter(ms);
-            for (int i = 0; i < this.data.Count; i++) bw.Write(this.data[i]);
+            for (int i = 0; i < this.data.Length; i++) bw.Write(this.data[i]);
         }
     }
 
@@ -1597,6 +1674,8 @@ namespace s4pi.Animation
                     return new ClipEventEffect(0, handler, typeId, size);
                 case 6:
                     return new ClipEventVisibility(0, handler, typeId, size);
+                case 9:
+                    return new ClipEventDestroyProp(0, handler, typeId, size);
                 case 10:
                     return new ClipEventStopEffect(0, handler, typeId, size);
                 case 11:
@@ -1636,6 +1715,7 @@ namespace s4pi.Animation
             }
         }
     }
+
     public enum ClipEventType : uint
     {
         INVALID = 0,

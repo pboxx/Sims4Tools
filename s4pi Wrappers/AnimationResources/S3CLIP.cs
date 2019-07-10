@@ -646,6 +646,7 @@ namespace s4pi.Animation
             public void Parse(Stream s, uint width, uint count)
             {
                 var br = new BinaryReader(s);
+
                 this.startTick = br.ReadUInt16();
                 this.flags = br.ReadUInt16();
 
