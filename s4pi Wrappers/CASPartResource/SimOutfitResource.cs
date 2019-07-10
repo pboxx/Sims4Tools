@@ -35,37 +35,46 @@ namespace CASPartResource
     public class SimOutfitResource : AResource
     {
         private uint version;
-        private float unknown1;
-        private float unknown2;
-        private float unknown3;
-        private float unknown4;
-        private float unknown5;
-        private float unknown6;
-        private float unknown7;
-        private float unknown8;
+        private float heavyValue;
+        private float fitValue;
+        private float leanValue;
+        private float bonyValue;
+        private float hipsWideValue;
+        private float hipsNarrowValue;
+        private float waistWideValue;
+        private float waistNarrowValue;
         private AgeGenderFlags age;
         private AgeGenderFlags gender;
-        private uint unknown14;
-        private uint unknown15;
+        private Species species;
+        private uint unknown1;
         private ulong skinToneReference;
-        private byte unknown9;
+        private CoatOverlayReferenceList coatLayers;
+
         private ByteIndexList sculptReference;
-
-        private ByteIndexList sculptReference2;
-
         private CountedTGIBlockList tgiList;
-        private SliderReferenceList sliderReferences1;
-        private SliderReferenceList sliderReferences2;
-        private DataBlobHandler unknown10;
-        private UnknownBlockList CasPartList;
+        private SliderReferenceList sliderReferencesFace;
+        private SliderReferenceList sliderReferencesBody;
+        private uint voiceActor;
+        private float voicePitch;
+        private ulong voiceEffect;
+        private uint unknown2;
+        private uint unknown3;
+        private OutfitBlockList outfitsList;
+                                                    //genetic info
+        private ByteIndexList sculptReference2;
+        private SliderReferenceList sliderReferencesFace2;
+        private SliderReferenceList sliderReferencesBody2;
+        private float heavyValue2;
+        private float fitValue2;
+        private float leanValue2;
+        private float bonyValue2;
+        private CaspReferenceList caspReferences2;
+        private uint voiceActor2;
+        private float voicePitch2;
 
-        private SliderReferenceList sliderReferences3;
-        private SliderReferenceList sliderReferences4;
-        private DataBlobHandler unknown12;
-        private CaspReferenceList caspReferences;
-        private DataBlobHandler unknown13;
-        private ulong caspReference;
-        private SimpleList<ulong> dataReferenceList;
+        private byte flags;
+        private ulong aspirationDataReference;
+        private SimpleList<ulong> traitsDataReferenceList;
 
 
         public SimOutfitResource(int APIversion, Stream s) : base(APIversion, s) { if (s == null) { OnResourceChanged(this, EventArgs.Empty); } else { Parse(s); } }
@@ -86,55 +95,64 @@ namespace CASPartResource
             this.tgiList = new CountedTGIBlockList(OnResourceChanged, _tgilist);
             s.Position = tempPosition;
 
-            this.unknown1 = r.ReadSingle();
-            this.unknown2 = r.ReadSingle();
-            this.unknown3 = r.ReadSingle();
-            this.unknown4 = r.ReadSingle();
-            this.unknown5 = r.ReadSingle();
-            this.unknown6 = r.ReadSingle();
-            this.unknown7 = r.ReadSingle();
-            this.unknown8 = r.ReadSingle();
+            this.heavyValue = r.ReadSingle();
+            this.fitValue = r.ReadSingle();
+            this.leanValue = r.ReadSingle();
+            this.bonyValue = r.ReadSingle();
+            this.hipsWideValue = r.ReadSingle();
+            this.hipsNarrowValue = r.ReadSingle();
+            this.waistWideValue = r.ReadSingle();
+            this.waistNarrowValue = r.ReadSingle();
 
             this.age = (AgeGenderFlags)r.ReadUInt32();
             this.gender = (AgeGenderFlags)r.ReadUInt32();
             if (version > 18)
             {
-                this.unknown14 = r.ReadUInt32();
-                this.unknown15 = r.ReadUInt32();
+                this.species = (Species)r.ReadUInt32();
+                this.unknown1 = r.ReadUInt32();
             }
             this.skinToneReference = r.ReadUInt64();
             if (this.version >= 24)
             {
-                this.unknown9 = r.ReadByte();
+                this.coatLayers = new CoatOverlayReferenceList(OnResourceChanged, s);
             }
             byte[] tmp = new byte[r.ReadByte()];
             for (int i = 0; i < tmp.Length; i++) tmp[i] = r.ReadByte();
             this.sculptReference = new ByteIndexList(OnResourceChanged, tmp, this.tgiList);
 
-            sliderReferences1 = new SliderReferenceList(OnResourceChanged, s, tgiList);
-            sliderReferences2 = new SliderReferenceList(OnResourceChanged, s, tgiList);
+            sliderReferencesFace = new SliderReferenceList(OnResourceChanged, s, tgiList);
+            sliderReferencesBody = new SliderReferenceList(OnResourceChanged, s, tgiList);
 
-            this.unknown10 = new DataBlobHandler(RecommendedApiVersion, OnResourceChanged, r.ReadBytes(24));
-            this.CasPartList = new UnknownBlockList(OnResourceChanged, s, this.tgiList, this.version);
+            this.voiceActor = r.ReadUInt32();
+            this.voicePitch = r.ReadSingle();
+            this.voiceEffect = r.ReadUInt64();
+            this.unknown2 = r.ReadUInt32();
+            this.unknown3 = r.ReadUInt32();
+            this.outfitsList = new OutfitBlockList(OnResourceChanged, s, this.tgiList, this.version);
 
             tmp = new byte[r.ReadByte()];
             for (int i = 0; i < tmp.Length; i++) tmp[i] = r.ReadByte();
             this.sculptReference2 = new ByteIndexList(OnResourceChanged, tmp, this.tgiList);
 
-            sliderReferences3 = new SliderReferenceList(OnResourceChanged, s, tgiList);
-            sliderReferences4 = new SliderReferenceList(OnResourceChanged, s, tgiList);
+            sliderReferencesFace2 = new SliderReferenceList(OnResourceChanged, s, tgiList);
+            sliderReferencesBody2 = new SliderReferenceList(OnResourceChanged, s, tgiList);
 
-            this.unknown12 = new DataBlobHandler(RecommendedApiVersion, OnResourceChanged, r.ReadBytes(16));
-            this.caspReferences = new CaspReferenceList(OnResourceChanged, tgiList);
+            this.heavyValue2 = r.ReadSingle();
+            this.fitValue2 = r.ReadSingle();
+            this.leanValue2 = r.ReadSingle();
+            this.bonyValue2 = r.ReadSingle();
+            this.caspReferences2 = new CaspReferenceList(OnResourceChanged, tgiList);
             byte count = r.ReadByte();
-            for (int i = 0; i < count; i++) caspReferences.Add(new CaspReference(RecommendedApiVersion, OnResourceChanged, s, tgiList));
-            this.unknown13 = new DataBlobHandler(recommendedApiVersion, OnResourceChanged, r.ReadBytes(9));
-            this.caspReference = r.ReadUInt64();
-            this.dataReferenceList = new SimpleList<ulong>(OnResourceChanged);
+            for (int i = 0; i < count; i++) caspReferences2.Add(new CaspReference(RecommendedApiVersion, OnResourceChanged, s, tgiList));
+            this.voiceActor2 = r.ReadUInt32();
+            this.voicePitch2 = r.ReadSingle();
+
+            this.flags = r.ReadByte();
+            this.aspirationDataReference = r.ReadUInt64();
+            this.traitsDataReferenceList = new SimpleList<ulong>(OnResourceChanged);
             int count2 = r.ReadByte();
             for (int i = 0; i < count2; i++)
-                this.dataReferenceList.Add(r.ReadUInt64());
-
+                this.traitsDataReferenceList.Add(r.ReadUInt64());
         }
 
         protected override Stream UnParse()
@@ -144,47 +162,59 @@ namespace CASPartResource
             w.Write(this.version);
             long tgiOffsetPosition = ms.Position;
             w.Write(0);
-            w.Write(unknown1);
-            w.Write(unknown2);
-            w.Write(unknown3);
-            w.Write(unknown4);
-            w.Write(unknown5);
-            w.Write(unknown6);
-            w.Write(unknown7);
-            w.Write(unknown8);
+            w.Write(heavyValue);
+            w.Write(fitValue);
+            w.Write(leanValue);
+            w.Write(bonyValue);
+            w.Write(hipsWideValue);
+            w.Write(hipsNarrowValue);
+            w.Write(waistWideValue);
+            w.Write(waistNarrowValue);
             w.Write((uint)age);
             w.Write((uint)gender);
             if (version > 18)
             {
-                w.Write(this.unknown14);
-                w.Write(this.unknown15);
+                w.Write((uint)this.species);
+                w.Write(this.unknown1);
             }
             w.Write(skinToneReference);
             if (this.version >= 24)
             {
-                w.Write(this.unknown9);
+                this.coatLayers.UnParse(ms);
             }
             w.Write((byte)this.sculptReference.Count);
             foreach (var value in this.sculptReference) w.Write(value);
-            sliderReferences1.UnParse(ms);
-            sliderReferences2.UnParse(ms);
-            unknown10.UnParse(ms);
-            this.CasPartList.UnParse(ms);
+            sliderReferencesFace.UnParse(ms);
+            sliderReferencesBody.UnParse(ms);
+
+            w.Write(this.voiceActor);
+            w.Write(this.voicePitch);
+            w.Write(this.voiceEffect);
+            w.Write(this.unknown2);
+            w.Write(this.unknown3);
+
+            this.outfitsList.UnParse(ms);
 
             w.Write((byte)this.sculptReference2.Count);
             foreach (var value in this.sculptReference2) w.Write(value);
 
-            sliderReferences3.UnParse(ms);
-            sliderReferences4.UnParse(ms);
+            sliderReferencesFace2.UnParse(ms);
+            sliderReferencesBody2.UnParse(ms);
 
-            unknown12.UnParse(ms);
-            w.Write((byte)caspReferences.Count);
-            for (int i = 0; i < caspReferences.Count; i++) caspReferences[i].UnParse(ms);
+            w.Write(this.heavyValue2);
+            w.Write(this.fitValue2);
+            w.Write(this.leanValue2);
+            w.Write(this.bonyValue2);
+            w.Write((byte)caspReferences2.Count);
+            for (int i = 0; i < caspReferences2.Count; i++) caspReferences2[i].UnParse(ms);
 
-            this.unknown13.UnParse(ms);
-            w.Write(this.caspReference);
-            w.Write((byte)this.dataReferenceList.Count);
-            foreach (var i in this.dataReferenceList) w.Write(i);
+            w.Write(this.voiceActor2);
+            w.Write(this.voicePitch2);
+
+            w.Write(this.flags);
+            w.Write(this.aspirationDataReference);
+            w.Write((byte)this.traitsDataReferenceList.Count);
+            foreach (var i in this.traitsDataReferenceList) w.Write(i);
 
             long tmpPostion = ms.Position;
             ms.Position = tgiOffsetPosition;
@@ -269,48 +299,97 @@ namespace CASPartResource
             #endregion
         }
 
-        public class UnknownReference : AHandlerElement, IEquatable<UnknownReference>
+        public class OutfitReference : AHandlerElement, IEquatable<OutfitReference>
         {
             private CountedTGIBlockList tgiList;
             private uint version;
-            private DataBlobHandler unknownBlock;
-            private CaspReferenceList unknownReference2List;
+            private ulong outfitID;
+            private ulong outfitFlags;
+            private ulong outfitCreated;
+            private bool matchHair;
+          //  private DataBlobHandler unknownBlock;
+            private CaspReferenceList CasPartList;
 
-            public UnknownReference(int apiVersion, EventHandler handler, CountedTGIBlockList tgiList, uint version) : base(apiVersion, handler) { this.tgiList = tgiList; this.version = version; }
-            public UnknownReference(int apiVersion, EventHandler handler, Stream s, CountedTGIBlockList tgiList, uint version) : base(apiVersion, handler) { this.tgiList = tgiList; this.version = version; Parse(s); }
+            public OutfitReference(int apiVersion, EventHandler handler, CountedTGIBlockList tgiList, uint version) : base(apiVersion, handler) { this.tgiList = tgiList; this.version = version; }
+            public OutfitReference(int apiVersion, EventHandler handler, Stream s, CountedTGIBlockList tgiList, uint version) : base(apiVersion, handler) { this.tgiList = tgiList; this.version = version; Parse(s); }
 
             public void Parse(Stream s)
             {
                 BinaryReader r = new BinaryReader(s);
                 if (this.version >= 24)
                 {
-                    this.unknownBlock = new DataBlobHandler(recommendedApiVersion, handler, r.ReadBytes(25));
+                    this.outfitID = r.ReadUInt64();
+                    this.outfitFlags = r.ReadUInt64();
+                    this.outfitCreated = r.ReadUInt64();
+                    this.matchHair = r.ReadBoolean();
+                  //  this.unknownBlock = new DataBlobHandler(recommendedApiVersion, handler, r.ReadBytes(25));
                 }
                 else
                 {
-                    this.unknownBlock = new DataBlobHandler(recommendedApiVersion, handler, r.ReadBytes(17));
+                    this.outfitID = r.ReadUInt64();
+                    this.outfitFlags = r.ReadUInt64();
+                  //  this.outfitCreated = r.ReadUInt64();
+                    this.matchHair = r.ReadBoolean();
+                  //  this.unknownBlock = new DataBlobHandler(recommendedApiVersion, handler, r.ReadBytes(17));
                 }
-                this.unknownReference2List = new CaspReferenceList(handler, s, tgiList);
+                this.CasPartList = new CaspReferenceList(handler, s, tgiList);
             }
 
             public void UnParse(Stream s)
             {
                 BinaryWriter w = new BinaryWriter(s);
-                this.unknownBlock.UnParse(s);
-                this.unknownReference2List.UnParse(s);
+                if (this.version >= 24)
+                {
+                    w.Write(this.outfitID);
+                    w.Write(this.outfitFlags);
+                    w.Write(this.outfitCreated);
+                    w.Write(this.matchHair);
+                    //  this.unknownBlock = new DataBlobHandler(recommendedApiVersion, handler, r.ReadBytes(25));
+                }
+                else
+                {
+                    w.Write(this.outfitID);
+                    w.Write(this.outfitFlags);
+                    //  w.Write(this.outfitCreated);
+                    w.Write(this.matchHair);
+                    //  this.unknownBlock = new DataBlobHandler(recommendedApiVersion, handler, r.ReadBytes(17));
+                }
+              //  this.unknownBlock.UnParse(s);
+                this.CasPartList.UnParse(s);
             }
 
 
-            public bool Equals(UnknownReference other)
+            public bool Equals(OutfitReference other)
             {
-                return this.unknownBlock.Equals(other.unknownBlock) && this.unknownReference2List.Equals(other.unknownReference2List);
+                return this.outfitID.Equals(other.outfitID) && this.outfitFlags.Equals(other.outfitFlags) && this.outfitCreated.Equals(other.outfitCreated) 
+                    && this.matchHair.Equals(other.matchHair) && this.CasPartList.Equals(other.CasPartList);
             }
             const int recommendedApiVersion = 1;
             public override int RecommendedApiVersion { get { return recommendedApiVersion; } }
             public override List<string> ContentFields { get { return GetContentFields(requestedApiVersion, this.GetType()); } }
-            public DataBlobHandler UnknownBlock { get { return this.unknownBlock; } set { if (!this.unknownBlock.Equals(value)) { OnElementChanged(); this.unknownBlock = value; } } }
-            public CaspReferenceList UnknownReference2List { get { return this.unknownReference2List; } set { if (!this.unknownReference2List.Equals(value)) { OnElementChanged(); this.unknownReference2List = value; } } }
-            public string Value { get { return ValueBuilder; } }            
+            [ElementPriority(0)]
+            public ulong OutfitID { get { return this.outfitID; } set { if (!this.outfitID.Equals(value)) { OnElementChanged(); this.outfitID = value; } } }
+            [ElementPriority(1)]
+            public ulong OutfitFlags { get { return this.outfitFlags; } set { if (!this.outfitFlags.Equals(value)) { OnElementChanged(); this.outfitFlags = value; } } }
+            [ElementPriority(2)]
+            public ulong OutfitCreated { get { return this.outfitCreated; } set { if (!this.outfitCreated.Equals(value)) { OnElementChanged(); this.outfitCreated = value; } } }
+            [ElementPriority(3)]
+            public bool MatchHair { get { return this.matchHair; } set { if (!this.matchHair.Equals(value)) { OnElementChanged(); this.matchHair = value; } } }
+            [ElementPriority(4)]
+            public CaspReferenceList CASPartList { get { return this.CasPartList; } set { if (!this.CasPartList.Equals(value)) { OnElementChanged(); this.CasPartList = value; } } }
+            public string Value { get { return ValueBuilder; } }
+            protected override List<string> ValueBuilderFields
+            {
+                get
+                {
+                    List<string> fields = base.ValueBuilderFields;
+                    if (this.version < 24)
+                    {
+                        fields.Remove("OutfitCreated");
+                    }
+                    return fields;
+                }
+            }
         }
 
         public class CaspReference : AHandlerElement, IEquatable<CaspReference>
@@ -352,30 +431,30 @@ namespace CASPartResource
             #endregion
         }
 
-        public class UnknownBlock : AHandlerElement, IEquatable<UnknownBlock>
+        public class OutfitBlock : AHandlerElement, IEquatable<OutfitBlock>
         {
 
-            private byte blockIndex;
+            private OutfitCategories category;
             private uint unknown1;
-            private UnknownReferenceList unknownReferenceList;
+            private OutfitReferenceList unknownReferenceList;
             private CountedTGIBlockList tgiList;
             private uint version;
 
-            public UnknownBlock(int apiVersion, EventHandler handler, CountedTGIBlockList tgiList, uint version) : base(apiVersion, handler) { this.tgiList = tgiList; this.version = version; }
-            public UnknownBlock(int apiVersion, EventHandler handler, Stream s, CountedTGIBlockList tgiList, uint version) : base(apiVersion, handler) { this.tgiList = tgiList; this.version = version; Parse(s, tgiList, version); }
+            public OutfitBlock(int apiVersion, EventHandler handler, CountedTGIBlockList tgiList, uint version) : base(apiVersion, handler) { this.tgiList = tgiList; this.version = version; }
+            public OutfitBlock(int apiVersion, EventHandler handler, Stream s, CountedTGIBlockList tgiList, uint version) : base(apiVersion, handler) { this.tgiList = tgiList; this.version = version; Parse(s, tgiList, version); }
             
             protected void Parse(Stream s, CountedTGIBlockList tgiList, uint version)
             {
                 BinaryReader r = new BinaryReader(s);
-                this.blockIndex = r.ReadByte();
+                this.category = (OutfitCategories)r.ReadByte();
                 this.unknown1 = r.ReadUInt32();
-                this.unknownReferenceList = new UnknownReferenceList(handler, s, tgiList, version);
+                this.unknownReferenceList = new OutfitReferenceList(handler, s, tgiList, version);
             }
 
             public void UnParse(Stream s)
             {
                 BinaryWriter w = new BinaryWriter(s);
-                w.Write(this.blockIndex);
+                w.Write((byte)this.category);
                 w.Write(this.unknown1);
                 this.unknownReferenceList.UnParse(s);
             }
@@ -383,11 +462,11 @@ namespace CASPartResource
 
             #region Content Fields
             [ElementPriority(0)]
-            public byte BlockIndex { get { return this.blockIndex; } set { if (!this.blockIndex.Equals(value)) { this.blockIndex = value; } } }
+            public OutfitCategories Category { get { return this.category; } set { if (!this.category.Equals(value)) { this.category = value; } } }
             [ElementPriority(1)]
             public uint Unknown1 { get { return this.unknown1; } set { if (!this.unknown1.Equals(value)) { this.unknown1 = value; } } }
             [ElementPriority(2)]
-            public UnknownReferenceList UnknownReferenceList { get { return this.unknownReferenceList; } set { if (!this.unknownReferenceList.Equals(value)) { this.unknownReferenceList = value; } } }
+            public OutfitReferenceList UnknownReferenceList { get { return this.unknownReferenceList; } set { if (!this.unknownReferenceList.Equals(value)) { this.unknownReferenceList = value; } } }
             const int recommendedApiVersion = 1;
             public override int RecommendedApiVersion { get { return recommendedApiVersion; } }
             public override List<string> ContentFields { get { return GetContentFields(requestedApiVersion, this.GetType()); } }
@@ -395,27 +474,40 @@ namespace CASPartResource
             #endregion
 
             #region IEquatable
-            public bool Equals(UnknownBlock other)
+            public bool Equals(OutfitBlock other)
             {
-                return this.blockIndex == other.blockIndex && this.unknown1 == other.unknown1 && this.unknownReferenceList.Equals(other.unknownReferenceList);
+                return this.category == other.category && this.unknown1 == other.unknown1 && this.unknownReferenceList.Equals(other.unknownReferenceList);
             }
             #endregion
 
+            public enum OutfitCategories : byte
+            {
+                EveryDay = 0,
+                Formal = 1,
+                Athletic = 2,
+                Sleep = 3,
+                Party = 4,
+                Bathing = 5,
+                Career = 6,
+                Situation = 7,
+                Special = 8,
+                Swimwear = 9
+            }
         }
 
-        public class UnknownBlockList: DependentList<UnknownBlock>
+        public class OutfitBlockList: DependentList<OutfitBlock>
         {
             private CountedTGIBlockList tgiList;
             private uint version;
-            public UnknownBlockList(EventHandler handler, CountedTGIBlockList tgiList, uint version) : base(handler) { this.tgiList = tgiList; this.version = version; }
-            public UnknownBlockList(EventHandler handler, Stream s, CountedTGIBlockList tgiList, uint version) : this(handler, tgiList, version) { Parse(s, tgiList, version); }
+            public OutfitBlockList(EventHandler handler, CountedTGIBlockList tgiList, uint version) : base(handler) { this.tgiList = tgiList; this.version = version; }
+            public OutfitBlockList(EventHandler handler, Stream s, CountedTGIBlockList tgiList, uint version) : this(handler, tgiList, version) { Parse(s, tgiList, version); }
 
             #region Data I/O
             protected void Parse(Stream s, CountedTGIBlockList tgiList, uint version)
             {
                 BinaryReader r = new BinaryReader(s);
                 int count = r.ReadInt32();
-                for (int i = 0; i < count; i++) this.Add(new UnknownBlock(recommendedApiVersion, handler, s, this.tgiList, this.version));
+                for (int i = 0; i < count; i++) this.Add(new OutfitBlock(recommendedApiVersion, handler, s, this.tgiList, this.version));
             }
 
             public override void UnParse(Stream s)
@@ -425,8 +517,8 @@ namespace CASPartResource
                 foreach (var entry in this) entry.UnParse(s);
             }
 
-            protected override UnknownBlock CreateElement(Stream s) { throw new NotImplementedException(); }
-            protected override void WriteElement(Stream s, UnknownBlock element) { throw new NotImplementedException(); }
+            protected override OutfitBlock CreateElement(Stream s) { throw new NotImplementedException(); }
+            protected override void WriteElement(Stream s, OutfitBlock element) { throw new NotImplementedException(); }
             #endregion
         }
 
@@ -456,19 +548,19 @@ namespace CASPartResource
             #endregion
         }
 
-        public class UnknownReferenceList : DependentList<UnknownReference>
+        public class OutfitReferenceList : DependentList<OutfitReference>
         {
             private CountedTGIBlockList tgiList;
             private uint version;
-            public UnknownReferenceList(EventHandler handler, CountedTGIBlockList tgiList, uint version) : base(handler) { this.tgiList = tgiList; this.version = version; }
-            public UnknownReferenceList(EventHandler handler, Stream s, CountedTGIBlockList tgiList, uint version) : this(handler, tgiList, version) { Parse(s, tgiList, version); }
+            public OutfitReferenceList(EventHandler handler, CountedTGIBlockList tgiList, uint version) : base(handler) { this.tgiList = tgiList; this.version = version; }
+            public OutfitReferenceList(EventHandler handler, Stream s, CountedTGIBlockList tgiList, uint version) : this(handler, tgiList, version) { Parse(s, tgiList, version); }
 
             #region Data I/O
             protected void Parse(Stream s, CountedTGIBlockList tgiList, uint version)
             {
                 BinaryReader r = new BinaryReader(s);
                 int count = r.ReadInt32();
-                for (int i = 0; i < count; i++) this.Add(new UnknownReference(recommendedApiVersion, handler, s, this.tgiList, this.version));
+                for (int i = 0; i < count; i++) this.Add(new OutfitReference(recommendedApiVersion, handler, s, this.tgiList, this.version));
             }
 
             public override void UnParse(Stream s)
@@ -478,10 +570,73 @@ namespace CASPartResource
                 foreach (var entry in this) entry.UnParse(s);
             }
 
-            protected override UnknownReference CreateElement(Stream s) { throw new NotImplementedException(); }
-            protected override void WriteElement(Stream s, UnknownReference element) { throw new NotImplementedException(); }
+            protected override OutfitReference CreateElement(Stream s) { throw new NotImplementedException(); }
+            protected override void WriteElement(Stream s, OutfitReference element) { throw new NotImplementedException(); }
             #endregion
 
+        }
+
+        public class CoatOverlayReferenceList : DependentList<CoatOverlayReference>
+        {
+            public CoatOverlayReferenceList(EventHandler handler) : base(handler) { }
+            public CoatOverlayReferenceList(EventHandler handler, Stream s) : this(handler) { Parse(s); }
+
+            #region Data I/O
+            protected void Parse(Stream s)
+            {
+                BinaryReader r = new BinaryReader(s);
+                byte count = r.ReadByte();
+                for (int i = 0; i < count; i++) this.Add(new CoatOverlayReference(recommendedApiVersion, handler, s));
+            }
+
+            public override void UnParse(Stream s)
+            {
+                BinaryWriter w = new BinaryWriter(s);
+                w.Write((byte)this.Count);
+                foreach (var entry in this) entry.UnParse(s);
+            }
+
+            protected override CoatOverlayReference CreateElement(Stream s) { throw new NotImplementedException(); }
+            protected override void WriteElement(Stream s, CoatOverlayReference element) { throw new NotImplementedException(); }
+            #endregion
+        }
+        
+        public class CoatOverlayReference : AHandlerElement, IEquatable<CoatOverlayReference>
+        {
+            public CoatOverlayReference(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
+            public CoatOverlayReference(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler) { Parse(s); }
+            private ulong instance;
+            private byte[] rgba;
+
+            public void Parse(Stream s)
+            {
+                BinaryReader r = new BinaryReader(s);
+                this.instance = r.ReadUInt64();
+                this.rgba = r.ReadBytes(4);
+            }
+
+            public void UnParse(Stream s)
+            {
+                BinaryWriter w = new BinaryWriter(s);
+                w.Write(this.instance);
+                w.Write(this.rgba);
+            }
+
+            const int recommendedApiVersion = 1;
+            public override int RecommendedApiVersion { get { return recommendedApiVersion; } }
+            public override List<string> ContentFields { get { var res = GetContentFields(requestedApiVersion, this.GetType()); return res; } }
+            [ElementPriority(0)]
+            public ulong Instance { get { return this.instance; } set { if (!this.instance.Equals(value)) { this.instance = value; } } }
+            [ElementPriority(1)]
+            public byte[] Color_RGBA { get { return this.rgba; } set { if (!this.rgba.Equals(value)) { this.rgba = value; } } }
+            public string Value { get { return ValueBuilder; } }
+
+            #region IEquatable
+            public bool Equals(CoatOverlayReference other)
+            {
+                return this.instance == other.instance && this.rgba == other.rgba;
+            }
+            #endregion
         }
         #endregion
 
@@ -496,60 +651,78 @@ namespace CASPartResource
         [ElementPriority(0)]
         public uint Version { get { return this.version; } set { if (!this.version.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.version = value; } } }
         [ElementPriority(1)]
-        public float Unknown1 { get { return this.unknown1; } set { if (!this.unknown1.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.unknown1 = value; } } }
+        public float HeavyValue { get { return this.heavyValue; } set { if (!this.heavyValue.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.heavyValue = value; } } }
         [ElementPriority(2)]
-        public float Unknown2 { get { return this.unknown2; } set { if (!this.unknown2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.unknown2 = value; } } }
+        public float FitValue { get { return this.fitValue; } set { if (!this.fitValue.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.fitValue = value; } } }
         [ElementPriority(3)]
-        public float Unknown3 { get { return this.unknown3; } set { if (!this.unknown3.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.unknown3 = value; } } }
+        public float LeanValue { get { return this.leanValue; } set { if (!this.leanValue.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.leanValue = value; } } }
         [ElementPriority(4)]
-        public float Unknown4 { get { return this.unknown4; } set { if (!this.unknown4.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.unknown4 = value; } } }
+        public float BonyValue { get { return this.bonyValue; } set { if (!this.bonyValue.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.bonyValue = value; } } }
         [ElementPriority(5)]
-        public float Unknown5 { get { return this.unknown5; } set { if (!this.unknown5.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.unknown5 = value; } } }
+        public float HipsWideValue { get { return this.hipsWideValue; } set { if (!this.hipsWideValue.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.hipsWideValue = value; } } }
         [ElementPriority(6)]
-        public float Unknown6 { get { return this.unknown6; } set { if (!this.unknown6.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.unknown6 = value; } } }
+        public float HipsNarrowValue { get { return this.hipsNarrowValue; } set { if (!this.hipsNarrowValue.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.hipsNarrowValue = value; } } }
         [ElementPriority(7)]
-        public float Unknown7 { get { return this.unknown7; } set { if (!this.unknown7.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.unknown7 = value; } } }
+        public float WaistWideValue { get { return this.waistWideValue; } set { if (!this.waistWideValue.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.waistWideValue = value; } } }
         [ElementPriority(8)]
-        public float Unknown8 { get { return this.unknown8; } set { if (!this.unknown8.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.unknown8 = value; } } }
+        public float WaistNarrowValue { get { return this.waistNarrowValue; } set { if (!this.waistNarrowValue.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.waistNarrowValue = value; } } }
         [ElementPriority(9)]
         public AgeGenderFlags Age { get { return this.age; } set { if (!this.age.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.age = value; } } }
         [ElementPriority(10)]
         public AgeGenderFlags Gender { get { return this.gender; } set { if (!this.gender.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.gender = value; } } }
         [ElementPriority(11)]
-        public uint Unknown14 { get { return this.unknown14; } set { if (!this.unknown14.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.unknown14 = value; } } }
+        public Species Species { get { return this.species; } set { if (!this.species.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.species = value; } } }
         [ElementPriority(12)]
-        public uint Unknown15 { get { return this.unknown15; } set { if (!this.unknown15.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.unknown15 = value; } } }
+        public uint Unknown1 { get { return this.unknown1; } set { if (!this.unknown1.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.unknown1 = value; } } }
         [ElementPriority(13)]
         public ulong SkinToneReference { get { return this.skinToneReference; } set { if (!this.skinToneReference.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.skinToneReference = value; } } }
-        [ElementPriority(14)]
-        public byte Unknown9 { get { return this.unknown9; } set { if (this.unknown9 != value) { OnResourceChanged(this, EventArgs.Empty); this.unknown9 = value; } } }
         [ElementPriority(15)]
-        public ByteIndexList SculptReference { get { return this.sculptReference; } set { if (!this.sculptReference.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.sculptReference = value; } } }
+        public CoatOverlayReferenceList CoatLayers { get { return this.coatLayers; } set { if (this.coatLayers != value) { OnResourceChanged(this, EventArgs.Empty); this.coatLayers = value; } } }
         [ElementPriority(16)]
-        public SliderReferenceList SliderReferences1 { get { return this.sliderReferences1; } set { if (!this.sliderReferences1.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.sliderReferences1 = value; } } }
+        public ByteIndexList SculptReference { get { return this.sculptReference; } set { if (!this.sculptReference.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.sculptReference = value; } } }
         [ElementPriority(17)]
-        public SliderReferenceList SliderReferences2 { get { return this.sliderReferences2; } set { if (!this.sliderReferences2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.sliderReferences2 = value; } } }
+        public SliderReferenceList SimModifierReferencesFace { get { return this.sliderReferencesFace; } set { if (!this.sliderReferencesFace.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.sliderReferencesFace = value; } } }
         [ElementPriority(18)]
-        public DataBlobHandler Unknown10 { get { return this.unknown10; } set { if (!this.unknown10.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.unknown10 = value; } } }
+        public SliderReferenceList SimModifierReferencesBody { get { return this.sliderReferencesBody; } set { if (!this.sliderReferencesBody.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.sliderReferencesBody = value; } } }
         [ElementPriority(19)]
-        public UnknownBlockList CASPartList { get { return this.CasPartList; } set { if (!this.CasPartList.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.CasPartList = value; } } }
+        public uint VoiceActor { get { return this.voiceActor; } set { if (!this.voiceActor.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.voiceActor = value; } } }
         [ElementPriority(20)]
-        public ByteIndexList SculptReference2 { get { return this.sculptReference2; } set { if (!this.sculptReference2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.sculptReference2 = value; } } }
+        public float VoicePitch { get { return this.voicePitch; } set { if (!this.voicePitch.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.voicePitch = value; } } }
         [ElementPriority(21)]
-        public SliderReferenceList SliderReferences3 { get { return this.sliderReferences3; } set { if (!this.sliderReferences3.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.sliderReferences3 = value; } } }
+        public ulong VoiceEffect { get { return this.voiceEffect; } set { if (!this.voiceEffect.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.voiceEffect = value; } } }
         [ElementPriority(22)]
-        public SliderReferenceList SliderReferences4 { get { return this.sliderReferences4; } set { if (!this.sliderReferences4.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.sliderReferences4 = value; } } }
+        public uint Unknown2 { get { return this.unknown2; } set { if (!this.unknown2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.unknown2 = value; } } }
         [ElementPriority(23)]
-        public DataBlobHandler Unknown12 { get { return this.unknown12; } set { if (!this.unknown12.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.unknown12 = value; } } }
+        public uint Unknown3 { get { return this.unknown3; } set { if (!this.unknown3.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.unknown3 = value; } } }
         [ElementPriority(24)]
-        public CaspReferenceList CASPReferences { get { return this.caspReferences; } set { if (!this.caspReferences.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.caspReferences = value; } } }
+        public OutfitBlockList OutfitsList { get { return this.outfitsList; } set { if (!this.outfitsList.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.outfitsList = value; } } }
         [ElementPriority(25)]
-        public DataBlobHandler Unknown13 { get { return this.unknown13; } set { if (!this.unknown13.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.unknown13 = value; } } }
+        public ByteIndexList SculptReference2 { get { return this.sculptReference2; } set { if (!this.sculptReference2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.sculptReference2 = value; } } }
         [ElementPriority(26)]
-        public ulong CASPReferenceList { get { return this.caspReference; } set { if (!this.caspReference.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.caspReference = value; } } }
+        public SliderReferenceList SimModifierReferencesFace2 { get { return this.sliderReferencesFace2; } set { if (!this.sliderReferencesFace2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.sliderReferencesFace2 = value; } } }
         [ElementPriority(27)]
-        public SimpleList<ulong> DataReferenceList { get { return this.dataReferenceList; } set { if (!this.dataReferenceList.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.dataReferenceList = value; } } }
+        public SliderReferenceList SimModifierReferencesBody2 { get { return this.sliderReferencesBody2; } set { if (!this.sliderReferencesBody2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.sliderReferencesBody2 = value; } } }
         [ElementPriority(28)]
+        public float HeavyValue2 { get { return this.heavyValue2; } set { if (!this.heavyValue2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.heavyValue2 = value; } } }
+        [ElementPriority(29)]
+        public float FitValue2 { get { return this.fitValue2; } set { if (!this.fitValue2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.fitValue2 = value; } } }
+        [ElementPriority(30)]
+        public float LeanValue2 { get { return this.leanValue2; } set { if (!this.leanValue2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.leanValue2 = value; } } }
+        [ElementPriority(31)]
+        public float BonyValue2 { get { return this.bonyValue2; } set { if (!this.bonyValue2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.bonyValue2 = value; } } }
+        [ElementPriority(32)]
+        public CaspReferenceList CASPReferences { get { return this.caspReferences2; } set { if (!this.caspReferences2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.caspReferences2 = value; } } }
+        [ElementPriority(33)]
+        public uint VoiceActor2 { get { return this.voiceActor2; } set { if (!this.voiceActor2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.voiceActor2 = value; } } }
+        [ElementPriority(34)]
+        public float VoicePitch2 { get { return this.voicePitch2; } set { if (!this.voicePitch2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.voicePitch2 = value; } } }
+        [ElementPriority(35)]
+        public byte Flags { get { return this.flags; } set { if (!this.flags.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.flags = value; } } }
+        [ElementPriority(36)]
+        public ulong AspirationDataReference { get { return this.aspirationDataReference; } set { if (!this.aspirationDataReference.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.aspirationDataReference = value; } } }
+        [ElementPriority(37)]
+        public SimpleList<ulong> TraitsDataReferenceList { get { return this.traitsDataReferenceList; } set { if (!this.traitsDataReferenceList.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.traitsDataReferenceList = value; } } }
+        [ElementPriority(38)]
         public CountedTGIBlockList TGIList { get { return this.tgiList; } set { if (!this.tgiList.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.tgiList = value; } } }
 
         protected override List<string> ValueBuilderFields
@@ -559,12 +732,12 @@ namespace CASPartResource
                 List<string> fields = base.ValueBuilderFields;
                 if (version <= 18)
                 {
-                    fields.Remove("Unknown14");
-                    fields.Remove("Unknown15");
+                    fields.Remove("Species");
+                    fields.Remove("Unknown1");
                 }
-                if (version < 24)
+                if (this.version < 24)
                 {
-                    fields.Remove("Unknown9");
+                    fields.Remove("CoatLayers");
                 }
                 return fields;
             }
