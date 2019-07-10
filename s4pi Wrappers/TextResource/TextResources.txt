@@ -103,6 +103,7 @@
 0xEC6A8FC6 TS4 XML -- balloon
 0xEE17C6AD TS4 XML -- animation
 0xF3ABFF3C TS4 XML -- casmodifiertuning
+0xF401205D TS4 XML -- headline
 0xF93B40CF Renderer_GlobalSsaoSettings (ScreenSpaceAmbientOcclusion)
 0xF958A092 TS4 XML -- zone_director
 0xFA0FFA34 TS4 XML -- ClubInteractionGroup
