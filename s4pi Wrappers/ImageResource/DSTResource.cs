@@ -27,7 +27,7 @@ using s4pi.Interfaces;
 
 namespace s4pi.ImageResource
 {
-    public class DSTResource : AResource
+    public class DSTResource : AResource, IDisposable
     {
         const Int32 recommendedApiVersion = 1;
 
@@ -41,6 +41,12 @@ namespace s4pi.ImageResource
         private bool isShuffled;
 
         public DSTResource(int APIversion, Stream s) : base(APIversion, s) { if (s == null) { OnResourceChanged(this, EventArgs.Empty); } else { Parse(s); } }
+
+        public void Dispose()
+        {
+            header = null;
+            data = null;
+        }
 
         protected void Parse(Stream s)
         {
