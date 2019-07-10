@@ -43,11 +43,12 @@ namespace CASPartResource
         }
 
         private uint version;
-        private ulong rleInstance;
+        private ulong rleInstance;      //version < 10
+        private SkinSetList skinSets;   //version >= 10
         private OverlayReferenceList overlayList;
         private ushort colorizeSaturation;
         private ushort colorizeHue;
-        private uint colorizeOpacity;
+        private uint pass2Opacity;
         private FlagList flagList; //Same as CASP flags
         private float makeupOpacity;
         private SwatchColorList swatchList;
@@ -73,11 +74,18 @@ namespace CASPartResource
             BinaryReader reader = new BinaryReader(s);
             s.Position = 0;
             this.version = reader.ReadUInt32();
-            this.rleInstance = reader.ReadUInt64();
+            if (this.version >= 10)
+            {
+                this.skinSets = new SkinSetList(this.OnResourceChanged, s);
+            }
+            else
+            {
+                this.rleInstance = reader.ReadUInt64();
+            }
             this.overlayList = new OverlayReferenceList(this.OnResourceChanged, s);
             this.colorizeSaturation = reader.ReadUInt16();
             this.colorizeHue = reader.ReadUInt16();
-            this.colorizeOpacity = reader.ReadUInt32();
+            this.pass2Opacity = reader.ReadUInt32();
             if (this.version > 6)
             {
                 this.flagList = new FlagList(this.OnResourceChanged, s);
@@ -86,10 +94,10 @@ namespace CASPartResource
             {
                 this.flagList = FlagList.CreateWithUInt16Flags(this.OnResourceChanged, s, SkinToneResource.recommendedApiVersion);
             }
-            this.makeupOpacity = reader.ReadSingle();
+            if (this.version < 10) this.makeupOpacity = reader.ReadSingle();
             this.swatchList = new SwatchColorList(this.OnResourceChanged, s);
             this.sortOrder = reader.ReadSingle();
-            this.makeupOpacity2 = reader.ReadSingle();
+            if (this.version < 10) this.makeupOpacity2 = reader.ReadSingle();
             if (this.version >= 8)
             {
                 this.tuningInstance = reader.ReadUInt64();
@@ -101,7 +109,15 @@ namespace CASPartResource
             MemoryStream ms = new MemoryStream();
             BinaryWriter w = new BinaryWriter(ms);
             w.Write(this.version);
-            w.Write(this.rleInstance);
+            if (this.version >= 10)
+            {
+                if (this.skinSets == null) this.skinSets = new SkinSetList(this.OnResourceChanged);
+                this.skinSets.UnParse(ms);
+            }
+            else
+            {
+                w.Write(this.rleInstance);
+            }
             if (this.overlayList == null)
             {
                 this.overlayList = new OverlayReferenceList(this.OnResourceChanged);
@@ -109,7 +125,7 @@ namespace CASPartResource
             this.overlayList.UnParse(ms);
             w.Write(this.colorizeSaturation);
             w.Write(this.colorizeHue);
-            w.Write(this.colorizeOpacity);
+            w.Write(this.pass2Opacity);
 
             this.flagList = this.flagList ?? new FlagList(this.OnResourceChanged);
             if (this.version > 6)
@@ -120,14 +136,14 @@ namespace CASPartResource
             {
                 this.flagList.WriteUInt16Flags(ms);
             }
-            w.Write(this.makeupOpacity);
+            if (this.version < 10) w.Write(this.makeupOpacity);
             if (this.swatchList == null)
             {
                 this.swatchList = new SwatchColorList(this.OnResourceChanged);
             }
             this.swatchList.UnParse(ms);
             w.Write(this.sortOrder);
-            w.Write(this.makeupOpacity2);
+            if (this.version < 10) w.Write(this.makeupOpacity2);
             if (this.version >= 8)
             {
                 w.Write(this.tuningInstance);
@@ -138,6 +154,145 @@ namespace CASPartResource
         #endregion
 
         #region Sub Class
+
+        public class SkinSet : AHandlerElement, IEquatable<SkinSet>
+        {
+            private ulong textureReference;
+            private ulong overlayReference;
+            private float overlayMultiplier;
+            private float makeupOpacity;
+            private float makeupOpacity2;
+
+            public SkinSet(int apiVersion, EventHandler handler)
+                : base(apiVersion, handler)
+            {
+            }
+
+            public SkinSet(int apiVersion, EventHandler handler, Stream s)
+                : base(apiVersion, handler)
+            {
+                BinaryReader r = new BinaryReader(s);
+                this.textureReference = r.ReadUInt64();
+                this.overlayReference = r.ReadUInt64();
+                this.overlayMultiplier = r.ReadSingle();
+                this.makeupOpacity = r.ReadSingle();
+                this.makeupOpacity2 = r.ReadSingle();
+            }
+
+            public void UnParse(Stream s)
+            {
+                BinaryWriter w = new BinaryWriter(s);
+                w.Write(this.textureReference);
+                w.Write(this.overlayReference);
+                w.Write(this.overlayMultiplier);
+                w.Write(this.makeupOpacity);
+                w.Write(this.makeupOpacity2);
+            }
+
+            #region AHandlerElement Members
+
+            public override int RecommendedApiVersion
+            {
+                get { return SkinToneResource.recommendedApiVersion; }
+            }
+
+            public override List<string> ContentFields
+            {
+                get { return AApiVersionedFields.GetContentFields(this.requestedApiVersion, this.GetType()); }
+            }
+
+            #endregion
+
+            public bool Equals(SkinSet other)
+            {
+                return this.textureReference == other.textureReference && this.overlayReference == other.overlayReference &&
+                    this.overlayMultiplier == other.overlayMultiplier && this.makeupOpacity == other.makeupOpacity && this.makeupOpacity2 == other.makeupOpacity2;
+            }
+
+            public string Value
+            {
+                get { return this.ValueBuilder; }
+            }
+
+            [ElementPriority(0)]
+            public ulong TextureReference 
+            {
+                get { return this.textureReference; }
+                set { if (this.textureReference != value) { this.OnElementChanged(); this.textureReference = value; } }
+            }
+            [ElementPriority(1)]
+            public ulong OverlayReference
+            {
+                get { return this.overlayReference; }
+                set { if (this.overlayReference != value) { this.OnElementChanged(); this.overlayReference = value; } }
+            }
+            [ElementPriority(2)]
+            public float OverlayMultiplier
+            {
+                get { return this.overlayMultiplier; }
+                set { if (this.overlayMultiplier != value) { this.OnElementChanged(); this.overlayMultiplier = value; } }
+            }
+            [ElementPriority(3)]
+            public float MakeupOpacity
+            {
+                get { return this.makeupOpacity; }
+                set { if (this.makeupOpacity != value) { this.OnElementChanged(); this.makeupOpacity = value; } }
+            }
+            [ElementPriority(4)]
+            public float MakeupOpacity2
+            {
+                get { return this.makeupOpacity2; }
+                set { if (this.makeupOpacity2 != value) { this.OnElementChanged(); this.makeupOpacity2 = value; } }
+            }
+        }
+
+        public class SkinSetList : DependentList<SkinSet>
+        {
+            public SkinSetList(EventHandler handler)
+                : base(handler)
+            {
+            }
+
+            public SkinSetList(EventHandler handler, Stream s)
+                : base(handler)
+            {
+                this.Parse(s);
+            }
+
+            #region Data I/O
+
+            protected override void Parse(Stream s)
+            {
+                BinaryReader r = new BinaryReader(s);
+                byte count = r.ReadByte();
+                for (int i = 0; i < count; i++)
+                {
+                    this.Add(new SkinSet(1, this.handler, s));
+                }
+            }
+
+            public override void UnParse(Stream s)
+            {
+                BinaryWriter w = new BinaryWriter(s);
+                w.Write((byte)this.Count);
+                foreach (var reference in this)
+                {
+                    reference.UnParse(s);
+                }
+            }
+
+            #endregion
+
+            protected override SkinSet CreateElement(Stream s)
+            {
+                return new SkinSet(1, this.handler, s);
+            }
+
+            protected override void WriteElement(Stream s, SkinSet element)
+            {
+                element.UnParse(s);
+            }
+        }
 
         public class OverlayReference : AHandlerElement, IEquatable<OverlayReference>
         {
@@ -280,6 +435,20 @@ namespace CASPartResource
         }
 
         [ElementPriority(1)]
+        public SkinSetList SkinSets
+        {
+            get { return this.skinSets; }
+            set
+            {
+                if (!this.skinSets.Equals(value))
+                {
+                    this.OnResourceChanged(this, EventArgs.Empty);
+                    this.skinSets = value;
+                }
+            }
+        }
+
+        [ElementPriority(1)]
         public ulong TextureInstance
         {
             get { return this.rleInstance; }
@@ -336,15 +505,15 @@ namespace CASPartResource
         }
 
         [ElementPriority(5)]
-        public uint ColorizeOpacity
+        public uint SecondPassOpacity
         {
-            get { return this.colorizeOpacity; }
+            get { return this.pass2Opacity; }
             set
             {
-                if (!this.colorizeOpacity.Equals(value))
+                if (!this.pass2Opacity.Equals(value))
                 {
                     this.OnResourceChanged(this, EventArgs.Empty);
-                    this.colorizeOpacity = value;
+                    this.pass2Opacity = value;
                 }
             }
         }
@@ -446,6 +615,16 @@ namespace CASPartResource
                 if (this.version < 8)
                 {
                     res.Remove("TuningDatafileInstance");
+                }
+                if (this.version >= 10)
+                {
+                    res.Remove("TextureInstance");
+                    res.Remove("MakeupOpacity");
+                    res.Remove("MakeupOpacity2");
+                }
+                else
+                {
+                    res.Remove("SkinSets");
                 }
                 return res;
             }
