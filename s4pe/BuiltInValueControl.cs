@@ -296,7 +296,6 @@ namespace S4PIDemoFE
             0x2E75C767, //  ICON   .png
             0x2F7D0002, //  IMAG   .jpg
             0x2F7D0004, //  IMAG   .png
-            0x5B282D45, //  THUM   .png
             0x5DE9DBA0, //  THUM   .png
             0x5DE9DBA1, //  THUM   .png
             0x5DE9DBA2, //  THUM   .png
@@ -436,13 +435,17 @@ namespace S4PIDemoFE
             0x3BD45407,
             0x3C1AF1F2,
             0x3C2A8647,
+            0x4D5B0931,
             0x56278554,
             0x5B282D45,
+            0x8E71065D,
             0x9C925813,
             0xA1FF2FC4,
+            0xB67673A2,
+            0xC1ED6D35,
             0xCD9DE247,
             0xE18CAEE2,
-            0xE254AE6E
+            0xE254AE6E 
         };
 
         PictureBox pb = new PictureBox();
@@ -454,6 +457,7 @@ namespace S4PIDemoFE
                 return;
             ThumbnailResource r = new ThumbnailResource(1, s);
             pb.Image = r.Image;
+          //  pb.Image = new Bitmap(r.ToImageStream());
         }
 
         public override bool IsAvailable
