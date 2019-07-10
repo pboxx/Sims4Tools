@@ -44,7 +44,7 @@ namespace CASPartResource
         private byte sliderID;
         private SliderCursor cursor;
         private SimRegion region;
-        private uint unknown3;
+        private SimSubRegion subRegion;
         private RestrictToGender restrictToGender;
         private ulong textureReference;
         private uint unknown4;
@@ -66,7 +66,7 @@ namespace CASPartResource
             this.region = (SimRegion)r.ReadUInt32();
             if (version >= 0x0E)
             {
-                this.unknown3 = r.ReadUInt32();
+                this.subRegion = (SimSubRegion)r.ReadUInt32();
                 this.restrictToGender = (RestrictToGender)r.ReadByte();
             }
             this.textureReference = r.ReadUInt64();
@@ -92,7 +92,7 @@ namespace CASPartResource
             w.Write((uint)this.region);
             if (version >= 0x0E)
             {
-                w.Write(this.unknown3);
+                w.Write((uint)this.subRegion);
                 w.Write((byte)this.restrictToGender);
             }
             w.Write(this.textureReference);
@@ -123,14 +123,14 @@ namespace CASPartResource
         [ElementPriority(6)]
         public SimRegion Region { get { return this.region; } set { if (!this.region.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.region = value; } } }
         [ElementPriority(7)]
-        public uint Unknown3 { get { return this.unknown3; } set { if (!this.unknown3.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.unknown3 = value; } } }
-        [ElementPriority(7)]
-        public RestrictToGender RestricttoGender { get { return this.restrictToGender; } set { if (!this.restrictToGender.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.restrictToGender = value; } } }
+        public SimSubRegion SubRegion { get { return this.subRegion; } set { if (!this.subRegion.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.subRegion = value; } } }
         [ElementPriority(8)]
-        public ulong TextureReference { get { return this.textureReference; } set { if (!this.textureReference.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.textureReference = value; } } }
+        public RestrictToGender RestricttoGender { get { return this.restrictToGender; } set { if (!this.restrictToGender.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.restrictToGender = value; } } }
         [ElementPriority(9)]
-        public uint Unknown4 { get { return this.unknown4; } set { if (!this.unknown4.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.unknown4 = value; } } }
+        public ulong TextureReference { get { return this.textureReference; } set { if (!this.textureReference.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.textureReference = value; } } }
         [ElementPriority(10)]
+        public uint Unknown4 { get { return this.unknown4; } set { if (!this.unknown4.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.unknown4 = value; } } }
+        [ElementPriority(11)]
         public SliderList SliderDescription { get { return this.sliderDescriptions; } set { if (!this.sliderDescriptions.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.sliderDescriptions = value; } } }
         
         public string Value { get { return ValueBuilder; } }
@@ -142,8 +142,7 @@ namespace CASPartResource
                 var res = base.ContentFields;
                 if (this.version < 0x0E)
                 {
-                    res.Remove("Unknown1");
-                    res.Remove("Unknown3");
+                    res.Remove("SubRegion");
                     res.Remove("FrameGender");
                 }
                 return res;

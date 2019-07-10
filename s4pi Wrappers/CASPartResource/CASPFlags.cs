@@ -70,6 +70,14 @@ namespace CASPartResource
         LittleDog = 4
     }
 
+    [Flags]
+    public enum SpeciesFlags : uint
+    {
+        LargeDog = 4,
+        Cat = 8,
+        SmallDog = 16
+    }
+
     public enum BodyType : uint
     {
         All = 0,
@@ -142,7 +150,9 @@ namespace CASPartResource
         OccultMouth = 0x43,
         OccultLeftCheek = 0x44,
         OccultRightCheek = 0x45,
-        OccultNeckScar = 0x46
+        OccultNeckScar = 0x46,
+        SkinDetailScar = 0x47,
+        SkinDetailAcne = 0x48
     }
 
     public enum BodySubType : uint
@@ -237,7 +247,9 @@ namespace CASPartResource
         BODYTYPE_OCCULT_MOUTH = 1ul << 3,
         BODYTYPE_OCCULT_LEFT_CHEEK = 1ul << 4,
         BODYTYPE_OCCULT_RIGHT_CHEEK = 1ul << 5,
-        BODYTYPE_OCCULT_NECK_SCAR = 1ul << 6
+        BODYTYPE_OCCULT_NECK_SCAR = 1ul << 6,
+        BODYTYPE_SKINDETAIL_SCAR = 1ul << 7,
+        BODYTYPE_SKINDETAIL_ACNE = 1ul << 8
     }
 
     [Flags]
@@ -410,10 +422,25 @@ namespace CASPartResource
         SIMREGION_BODY,
         SIMREGION_UPPERBODY,
         SIMREGION_LOWERBODY,
+        SIMREGION_TAIL,
+        SIMREGION_FUR,
+        SIMREGION_FORELEGS,
+        SIMREGION_HINDLEGS
       //  SIMREGION_BODY_END = SIMREGION_LOWERBODY,   // body end
 
-        SIMREGION_ALL = SIMREGION_LOWERBODY + 1,     // all
+      //  SIMREGION_ALL = SIMREGION_LOWERBODY + 1,     // all
 
-        SIMREGION_INVALID = 32
+      //  SIMREGION_INVALID = 35
     };
+
+    public enum SimSubRegion
+    {
+        None = 0,
+        EarsUp = 1,
+        EarsDown = 2,
+        TailLong = 3,
+        TailRing = 4,
+        TailScrew = 5,
+        TailStub = 6
+    }
 }

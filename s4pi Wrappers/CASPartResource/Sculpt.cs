@@ -110,7 +110,7 @@ namespace CASPartResource
                 w.Write(this.delayLoadKey[i].ResourceType);
                 w.Write(this.delayLoadKey[i].ResourceGroup);
             }
-            uint posCounter = (delayLoadKey == null) ? 44U : 60U;
+            uint posCounter = (delayLoadKey == null || delayLoadKey.Count == 0) ? 44U : 60U;
             for (int i = 0; i < sculpts.Length; i++)
             {
                 ObjectData obj = new ObjectData(0, null, posCounter, 121);
@@ -200,14 +200,15 @@ namespace CASPartResource
             uint version;
             AgeGenderFlags ageGender;
             SimRegion region;
-            uint unknown5;
+            SimSubRegion subRegion;
             LinkTags linkTag;
             TGIBlock textureRef;
             TGIBlock specularRef;
             TGIBlock imageRef;
             byte unknown7;
             TGIBlock[] dmapRef;
-            byte[] unknown8;
+            TGIBlock boneRef;
+            uint unknown8;
 
             public SculptBlock(int apiVersion, EventHandler handler) : base(apiVersion, handler) { this.UnParse(new MemoryStream()); }
 
@@ -218,7 +219,7 @@ namespace CASPartResource
                 this.version = r.ReadUInt32();
                 this.ageGender = (AgeGenderFlags)r.ReadUInt32();
                 this.region = (SimRegion)r.ReadUInt32();
-                this.unknown5 = r.ReadUInt32();
+                this.subRegion = (SimSubRegion)r.ReadUInt32();
                 this.linkTag = (LinkTags)r.ReadUInt32();
                 this.textureRef = new TGIBlock(RecommendedApiVersion, handler, "ITG", s);
                 this.specularRef = new TGIBlock(RecommendedApiVersion, handler, "ITG", s);
@@ -226,7 +227,8 @@ namespace CASPartResource
                 this.unknown7 = r.ReadByte();
                 this.dmapRef = new TGIBlock[2];
                 for (int i = 0; i < this.dmapRef.Length; i++) this.dmapRef[i] = new TGIBlock(RecommendedApiVersion, handler, "ITG", s);
-                this.unknown8 = r.ReadBytes(20);
+                this.boneRef = new TGIBlock(RecommendedApiVersion, handler, "ITG", s); ;
+                this.unknown8 = r.ReadUInt32();
             }
 
             public void UnParse(Stream s)
@@ -235,7 +237,7 @@ namespace CASPartResource
                 w.Write(this.version);
                 w.Write((uint)this.ageGender);
                 w.Write((uint)this.region);
-                w.Write(this.unknown5);
+                w.Write((uint)this.subRegion);
                 w.Write((uint)this.linkTag);
                 this.textureRef.UnParse(s);
                 this.specularRef.UnParse(s);
@@ -243,6 +245,7 @@ namespace CASPartResource
                 w.Write(this.unknown7);
                 if (this.dmapRef == null) this.dmapRef = new TGIBlock[] { new TGIBlock(0, null, 0, 0, 0), new TGIBlock(0, null, 0, 0, 0) };
                 for (int i = 0; i < this.dmapRef.Length; i++) this.dmapRef[i].UnParse(s);
+                this.boneRef.UnParse(s);
                 w.Write(this.unknown8);
             }
 
@@ -254,7 +257,7 @@ namespace CASPartResource
             public bool Equals(SculptBlock other)
             {
                 return this.version == other.version &&
-                    this.ageGender == other.ageGender && this.region == other.region && this.unknown5 == other.unknown5 &&
+                    this.ageGender == other.ageGender && this.region == other.region && this.subRegion == other.subRegion &&
                     this.linkTag == other.linkTag && this.textureRef == other.textureRef && this.specularRef == other.specularRef &&
                     this.imageRef == other.imageRef && this.unknown7 == other.unknown7 && this.dmapRef == other.dmapRef &&
                     this.unknown8 == other.unknown8;
@@ -268,7 +271,7 @@ namespace CASPartResource
             [ElementPriority(4)]
             public SimRegion Region { get { return this.region; } set { if (!value.Equals(this.region)) { this.region = value; OnElementChanged(); } } }
             [ElementPriority(5)]
-            public uint Unknown5 { get { return this.unknown5; } set { if (!value.Equals(this.unknown5)) { this.unknown5 = value; OnElementChanged(); } } }
+            public SimSubRegion SubRegion { get { return this.subRegion; } set { if (!value.Equals(this.subRegion)) { this.subRegion = value; OnElementChanged(); } } }
             [ElementPriority(6)]
             public LinkTags LinkTag { get { return this.linkTag; } set { if (!value.Equals(this.linkTag)) { this.linkTag = value; OnElementChanged(); } } }
             [ElementPriority(7)]
@@ -282,7 +285,9 @@ namespace CASPartResource
             [ElementPriority(11)]
             public TGIBlock[] DeformerMapRef { get { return this.dmapRef; } set { if (!value.Equals(this.dmapRef)) { this.dmapRef = value; OnElementChanged(); } } }
             [ElementPriority(12)]
-            public byte[] Unknown8 { get { return this.unknown8; } set { if (!value.Equals(this.unknown8)) { this.unknown8 = value; OnElementChanged(); } } }
+            public TGIBlock BoneDeltaRef { get { return this.boneRef; } set { if (!value.Equals(this.boneRef)) { this.boneRef = value; OnElementChanged(); } } }
+            [ElementPriority(13)]
+            public uint Unknown8 { get { return this.unknown8; } set { if (!value.Equals(this.unknown8)) { this.unknown8 = value; OnElementChanged(); } } }
             #endregion
 
             public string Value { get { return ValueBuilder; } }

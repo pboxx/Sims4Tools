@@ -41,7 +41,7 @@ namespace CASPartResource
         private uint version { get; set; }
         private AgeGenderFlags gender { get; set; }
         private SimRegion region { get; set; }
-        private uint reserved0 { get; set; }
+        private SimSubRegion subRegion { get; set; }
         private LinkTags linkTag { get; set; }
         private TGIBlock bonePoseKey { get; set; }
         private TGIBlock deformerMapShapeKey { get; set; }
@@ -83,7 +83,7 @@ namespace CASPartResource
             this.version = r.ReadUInt32();
             this.gender = (AgeGenderFlags)r.ReadUInt32();
             this.region = (SimRegion)r.ReadUInt32();
-            if (this.version >= 144) this.reserved0 = r.ReadUInt32();
+            if (this.version >= 144) this.subRegion = (SimSubRegion)r.ReadUInt32();
             this.linkTag = (LinkTags)r.ReadUInt32();
             this.bonePoseKey = new TGIBlock(recommendedApiVersion, OnResourceChanged, "ITG", s);
             this.deformerMapShapeKey = new TGIBlock(recommendedApiVersion, OnResourceChanged, "ITG", s);
@@ -126,7 +126,7 @@ namespace CASPartResource
             w.Write(this.version);
             w.Write((uint)this.gender);
             w.Write((uint)this.region);
-            if (this.version >= 144) w.Write(this.reserved0);
+            if (this.version >= 144) w.Write((uint)this.subRegion);
             w.Write((uint)this.linkTag);
             if (this.bonePoseKey == null) this.bonePoseKey = new TGIBlock(recommendedApiVersion, OnResourceChanged);
             this.bonePoseKey.UnParse(ms);
@@ -256,7 +256,7 @@ namespace CASPartResource
         [ElementPriority(7)]
         public SimRegion Region { get { return this.region; } set { if (!this.region.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.region = value; } } }
         [ElementPriority(8)]
-        public uint Reserved0 { get { return this.reserved0; } set { if (!this.reserved0.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.reserved0 = value; } } }
+        public SimSubRegion SubRegion { get { return this.subRegion; } set { if (!this.subRegion.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.subRegion = value; } } }
         [ElementPriority(9)]
         public LinkTags LinkTag { get { return this.linkTag; } set { if (!this.linkTag.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.linkTag = value; } } }
         [ElementPriority(10)]

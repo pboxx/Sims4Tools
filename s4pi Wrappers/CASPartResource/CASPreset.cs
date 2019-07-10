@@ -48,7 +48,7 @@ namespace CASPartResource
         private AgeGenderFlags bodyFrameGender;
         private Species species;
         private SimRegion region;
-        private uint bodySubType;
+        private SimSubRegion subRegion;
         private ArchetypeFlags archetype;
         private float displayIndex;
         private uint presetNameKey;
@@ -96,7 +96,7 @@ namespace CASPartResource
             this.region = (SimRegion)reader.ReadUInt32();
             if (this.version >= 9)
             {
-                this.bodySubType = reader.ReadUInt32();
+                this.subRegion = (SimSubRegion)reader.ReadUInt32();
             }
             this.archetype = (ArchetypeFlags)reader.ReadUInt32();
             this.displayIndex = reader.ReadSingle();
@@ -149,7 +149,7 @@ namespace CASPartResource
             w.Write((uint)this.region);
             if (this.version >= 9)
             {
-                w.Write(this.bodySubType);
+                w.Write((uint)this.subRegion);
             }
             w.Write((uint)this.archetype);
             w.Write(this.displayIndex);
@@ -584,15 +584,15 @@ namespace CASPartResource
         }
 
         [ElementPriority(5)]
-        public uint BodySubType
+        public SimSubRegion SubRegion
         {
-            get { return this.bodySubType; }
+            get { return this.subRegion; }
             set
             {
-                if (!this.bodySubType.Equals(value))
+                if (!this.subRegion.Equals(value))
                 {
                     this.OnResourceChanged(this, EventArgs.Empty);
-                    this.bodySubType = value;
+                    this.subRegion = value;
                 }
             }
         }
