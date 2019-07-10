@@ -51,6 +51,7 @@ namespace NameMapResource
 
         void Parse(Stream s)
         {
+            if (s.Length == 0) return;
             BinaryReader br = new BinaryReader(s);
 
             version = br.ReadUInt32();
