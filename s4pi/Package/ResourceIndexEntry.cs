@@ -109,14 +109,25 @@ namespace s4pi.Package
             set { byte[] src = BitConverter.GetBytes(value); Array.Copy(src, 0, indexEntry, 28, src.Length); OnElementChanged(); }
         }
         /// <summary>
-        /// 0xFFFF if Filesize != Memsize, else 0x0000
+        /// 0x0000 if not compressed, should be 0x5A42 if compressed
         /// </summary>
         [MinimumVersion(1)]
         [MaximumVersion(recommendedApiVersion)]
         public override UInt16 Compressed
         {
             get { return BitConverter.ToUInt16(indexEntry, 32); }
-            set { byte[] src = BitConverter.GetBytes(value); Array.Copy(src, 0, indexEntry, 32, src.Length); OnElementChanged(); }
+            set 
+            { 
+                if (value != BitConverter.ToUInt16(indexEntry, 32)) compressionChanged = !compressionChanged;
+                byte[] src = BitConverter.GetBytes(value); Array.Copy(src, 0, indexEntry, 32, src.Length); OnElementChanged(); 
+            }
+        }
+        /// <summary>
+        /// Returns the compression the resource is currently using if it has been changed since the last save
+        /// </summary>
+        public UInt16 OriginalCompression
+        {
+            get { if (compressionChanged) return (ushort)(Compressed == 0x0000 ? 0x5A42 : 0x0000); else return Compressed; }
         }
         /// <summary>
         /// Always 0x0001
@@ -184,6 +195,11 @@ namespace s4pi.Package
         /// True if the index entry should be treated as deleted
         /// </summary>
         bool isDeleted = false;
+
+        /// <summary>
+        /// True if the user has requested a change in compression
+        /// </summary>
+        bool compressionChanged = false;
 
         /// <summary>
         /// The uncompressed resource data associated with this index entry
