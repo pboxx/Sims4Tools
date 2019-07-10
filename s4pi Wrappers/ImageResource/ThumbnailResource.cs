@@ -41,7 +41,6 @@ namespace s4pi.ImageResource
 
         private byte[] rawData;
 
-
         public ThumbnailResource(int APIversion, Stream s) : base(APIversion, s)  { Parse(s); }
 
         private void Parse(Stream s)
@@ -108,6 +107,53 @@ namespace s4pi.ImageResource
             return ms;
         }
 
+        //private void TransformToPNG()
+        //{
+        //    using (MemoryStream ms = new MemoryStream(this.rawData))
+        //    {
+        //        BinaryReader r = new BinaryReader(ms);
+        //        Bitmap colorImage;
+        //        ms.Position = 0;
+        //        using (MemoryStream colorStream = new MemoryStream())
+        //        {
+        //            colorStream.Write(r.ReadBytes(20), 0, 20);
+        //            Bitmap alphaImage = null;
+        //            if (r.ReadUInt16() == 0xE0FFU)
+        //            {
+        //                ushort length = r.ReadUInt16();
+        //                length = (ushort)((length & 0xFF00) >> 8 | (length & 0x00FF) << 8);
+        //                if (r.ReadUInt32() == 0x41464C41U)
+        //                {
+        //                    uint lengthAlpha = r.ReadUInt32();
+        //                    lengthAlpha = (uint)(((lengthAlpha & 0xFF000000) >> 24) | ((lengthAlpha & 0x00FF0000) >> 8) | ((lengthAlpha & 0x0000FF00) << 8) | ((lengthAlpha & 0x000000FF) << 24));
+        //                    using (MemoryStream alphaStream = new MemoryStream(r.ReadBytes((int)(lengthAlpha))))
+        //                    {
+        //                        alphaImage = new Bitmap(alphaStream);
+        //                    }
+        //                    ms.Position = 22 + length;
+        //                }
+        //                else
+        //                {
+        //                    ms.Position = 20;
+        //                }
+        //            }
+        //            byte[] buffer = new byte[ms.Length];
+        //            int len = ms.Read(buffer, 0, buffer.Length);
+        //            colorStream.Write(buffer, 0, len);
+        //            colorStream.Position = 0;
+        //            colorImage = new Bitmap(colorStream);
+        //            if (alphaImage != null)
+        //            {
+        //                if (colorImage.Width != alphaImage.Width || colorImage.Height != alphaImage.Height) throw new InvalidDataException("Not a proper TS4 Thumbnail image");
+        //                colorImage = UpdateAlpha(colorImage, alphaImage);
+        //            }
+        //            ms.Position = 0;
+        //            this.image = colorImage;
+        //            return;
+        //        }
+        //    }
+        //}
+
         private void TransformToPNG()
         {
             using (MemoryStream ms = new MemoryStream(this.rawData))
@@ -136,6 +182,7 @@ namespace s4pi.ImageResource
                 this.image = colorImage;
             }
         }
+
         private Bitmap image;
         public Bitmap Image {
             get { if (image == null) { return new Bitmap(1, 1); } else { return this.image; }; } 
@@ -232,6 +279,8 @@ namespace s4pi.ImageResource
                 }
 
             img.UnlockBits(imgBitmapData);
+            source.UnlockBits(sourceBitmapData);
+            alpha.UnlockBits(alphaBitmapData);
             return img;
         }
 
@@ -332,7 +381,7 @@ namespace s4pi.ImageResource
     {
         public ThumbnailResourceHandler()
         {
-            this.Add(typeof(ThumbnailResource), new List<string>(new string[] { "0x0D338A3A", "0x16CCF748", "0x3BD45407", "0x3C1AF1F2", "0x3C2A8647", "0x5B282D45", "0xCD9DE247", "0xE18CAEE2", "0xE254AE6E", }));
+            this.Add(typeof(ThumbnailResource), new List<string>(new string[] { "0x0D338A3A", "0x16CCF748", "0x3BD45407", "0x3C1AF1F2", "0x3C2A8647", "0x4D5B0931", "0x5B282D45", "0x8E71065D", "0xB67673A2", "0xC1ED6D35", "0xCD9DE247", "0xE18CAEE2", "0xE254AE6E", }));
         }
     }
 }
