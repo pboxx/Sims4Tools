@@ -59,10 +59,12 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AnimalCoatResource.cs" />
     <Compile Include="BoneResource.cs" />
     <Compile Include="CASPartResource.cs" />
     <Compile Include="CASPFlags.cs" />
     <Compile Include="CASPreset.cs" />
+    <Compile Include="SimPresetResource.cs" />
     <Compile Include="DeformerMapResource.cs" />
     <Compile Include="Handlers\Flag.cs" />
     <Compile Include="HotSpotControl.cs" />
