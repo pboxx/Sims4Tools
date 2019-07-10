@@ -123,8 +123,9 @@ namespace s4pi.Package
                 newIE.Chunkoffset = (uint)s.Position;
                 w.Write(value);
                 w.Flush();
-
-                if (value.Length < newIE.Memsize)
+                //cgm
+                //if (value.Length < newIE.Memsize)
+                if (ie.Compressed != 0x0000u)
                 {
                     // Move to TS4
                     newIE.Compressed = 0x5A42;
@@ -567,8 +568,11 @@ namespace s4pi.Package
                             ie.ResourceType, ie.ResourceGroup, ie.Instance, ie.Memsize, chunk.Length));
 
                 byte[] comp = ie.Compressed != 0 ? Compression.CompressStream(chunk) : chunk;
-                if (comp.Length < chunk.Length)
+                //if (comp.Length < chunk.Length)
                     chunk = comp;
+                //cgm
+                //else
+                //    ie.Compressed = 0x0000;
             }
             else
             {
@@ -639,7 +643,7 @@ namespace s4pi.Package
         // Required by API, not user tools
 
         /// <summary>
-        /// Required internally by s3pi - <b>not</b> for use in user tools.
+        /// Required internally by s4pi - <b>not</b> for use in user tools.
         /// Please use <c>WrapperDealer.GetResource(int, IPackage, IResourceIndexEntry)</c> instead.
         /// </summary>
         /// <param name="rc">IResourceIndexEntry of resource</param>
@@ -656,7 +660,9 @@ namespace s4pi.Package
 
             byte[] data = null;
             if (rc.Filesize == 1 && rc.Memsize == 0xFFFFFFFF) return null;//{ data = new byte[0]; }
-            else if (rc.Filesize == rc.Memsize)
+                //cgm
+            //else if (rc.Filesize == rc.Memsize)
+            else if (rie.OriginalCompression == 0x0000)
             {
                 data = (new BinaryReader(packageStream)).ReadBytes((int)rc.Filesize);
             }
