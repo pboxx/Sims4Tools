@@ -34,7 +34,7 @@ namespace s4pi.Package
 
         public static byte[] UncompressStream(Stream stream, int filesize, int memsize)
         {
-
+            if (memsize < 2) return new byte[0];
             BinaryReader r = new BinaryReader(stream);
             long end = stream.Position + filesize;
 
@@ -56,7 +56,7 @@ namespace s4pi.Package
             }
             else
             {
-                throw new InvalidDataException("Unrecognized compression format");
+                throw new InvalidDataException("Unrecognized compression format, header: 0x" + header[0].ToString("X2") + header[1].ToString("X2"));
             }
 
             if (useDEFLATE)
@@ -193,7 +193,9 @@ namespace s4pi.Package
             using (MemoryStream ms = new MemoryStream(data))
             {
                 bool smaller = _compress(ms, out result);
-                return smaller ? result : data;
+                //cgm
+                //return smaller ? result : data;
+                return result;
             }
         }
 
@@ -221,7 +223,9 @@ namespace s4pi.Package
                 }
                 else
                 {
-                    res = null;
+                    //cgm
+                    //res = null;
+                    res = result.ToArray();
                     return false;
                 }
 
