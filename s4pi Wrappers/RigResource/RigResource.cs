@@ -172,7 +172,7 @@ namespace RigResource
             int opposingBoneIndex;
             int parentBoneIndex;
             uint hash;
-            uint unknown2;
+            uint flags;
             #endregion
 
             #region Constructors
@@ -186,7 +186,7 @@ namespace RigResource
             public Bone(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler) { Parse(s); }
             public Bone(int apiVersion, EventHandler handler, Bone basis)
                 : this(apiVersion, handler, basis.position, basis.orientation, basis.scaling,
-                basis.name, basis.opposingBoneIndex, basis.parentBoneIndex, basis.hash, basis.unknown2) { }
+                basis.name, basis.opposingBoneIndex, basis.parentBoneIndex, basis.hash, basis.flags) { }
             public Bone(int apiVersion, EventHandler handler,
                 Vertex position, Quaternion quaternion, Vertex scaling,
                 string name, int opposingBoneIndex, int parentBoneIndex, uint hash, uint unknown2)
@@ -199,7 +199,7 @@ namespace RigResource
                 this.opposingBoneIndex = opposingBoneIndex;
                 this.parentBoneIndex = parentBoneIndex;
                 this.hash = hash;
-                this.unknown2 = unknown2;
+                this.flags = unknown2;
             }
             #endregion
 
@@ -214,7 +214,7 @@ namespace RigResource
                 opposingBoneIndex = r.ReadInt32();
                 parentBoneIndex = r.ReadInt32();
                 hash = r.ReadUInt32();
-                unknown2 = r.ReadUInt32();
+                flags = r.ReadUInt32();
             }
 
             internal void UnParse(Stream s)
@@ -232,7 +232,7 @@ namespace RigResource
                 w.Write(opposingBoneIndex);
                 w.Write(parentBoneIndex);
                 w.Write(hash);
-                w.Write(unknown2);
+                w.Write(flags);
             }
             #endregion
 
@@ -245,7 +245,7 @@ namespace RigResource
             public bool Equals(Bone other)
             {
                 return position.Equals(other.position) && orientation.Equals(other.orientation) && scaling.Equals(other.scaling) && name.Equals(other.name)
-                    && opposingBoneIndex.Equals(other.opposingBoneIndex) && parentBoneIndex.Equals(other.parentBoneIndex) && hash.Equals(other.hash) && unknown2.Equals(other.unknown2);
+                    && opposingBoneIndex.Equals(other.opposingBoneIndex) && parentBoneIndex.Equals(other.parentBoneIndex) && hash.Equals(other.hash) && flags.Equals(other.flags);
             }
 
             public override bool Equals(object obj)
@@ -256,7 +256,7 @@ namespace RigResource
             public override int GetHashCode()
             {
                 return position.GetHashCode() ^ orientation.GetHashCode() ^ scaling.GetHashCode() ^ name.GetHashCode()
-                    ^ opposingBoneIndex.GetHashCode() ^ parentBoneIndex.GetHashCode() ^ hash.GetHashCode() ^ unknown2.GetHashCode();
+                    ^ opposingBoneIndex.GetHashCode() ^ parentBoneIndex.GetHashCode() ^ hash.GetHashCode() ^ flags.GetHashCode();
             }
             #endregion
 
@@ -276,7 +276,7 @@ namespace RigResource
             [ElementPriority(7)]
             public uint Hash { get { return hash; } set { if (hash != value) { hash = value; OnElementChanged(); } } }
             [ElementPriority(8)]
-            public uint Unknown2 { get { return unknown2; } set { if (unknown2 != value) { unknown2 = value; OnElementChanged(); } } }
+            public uint Flags { get { return flags; } set { if (flags != value) { flags = value; OnElementChanged(); } } }
 
             public string Value { get { return ValueBuilder; } }
             #endregion
