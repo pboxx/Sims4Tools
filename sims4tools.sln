@@ -145,6 +145,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TerrainMeshResource", "s4pi
 		{00200E76-C245-42A7-B567-5C30EDBCE977} = {00200E76-C245-42A7-B567-5C30EDBCE977}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RLESMaskHelper", "s4pe Helpers\RLESMaskHelper\RLESMaskHelper.csproj", "{B6AB998D-F3E9-46AB-BB6B-7DF8CBFB873D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -645,6 +647,16 @@ Global
 		{27F9106B-6B9D-4718-8BDC-83EC70A76179}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{27F9106B-6B9D-4718-8BDC-83EC70A76179}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{27F9106B-6B9D-4718-8BDC-83EC70A76179}.Release|x86.ActiveCfg = Release|Any CPU
+		{B6AB998D-F3E9-46AB-BB6B-7DF8CBFB873D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6AB998D-F3E9-46AB-BB6B-7DF8CBFB873D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6AB998D-F3E9-46AB-BB6B-7DF8CBFB873D}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{B6AB998D-F3E9-46AB-BB6B-7DF8CBFB873D}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{B6AB998D-F3E9-46AB-BB6B-7DF8CBFB873D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B6AB998D-F3E9-46AB-BB6B-7DF8CBFB873D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6AB998D-F3E9-46AB-BB6B-7DF8CBFB873D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6AB998D-F3E9-46AB-BB6B-7DF8CBFB873D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{B6AB998D-F3E9-46AB-BB6B-7DF8CBFB873D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{B6AB998D-F3E9-46AB-BB6B-7DF8CBFB873D}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
