@@ -57,6 +57,9 @@ namespace RegionDescriptionResource
 
         ParallaxLayerImageFile parallaxLayerImageFile;//[5] <format=hex>
         UInt64 overlayImageFileNameHash;// <format=hex>
+
+        UInt64 gfxInstance;            //version 11
+        SimpleList<UInt64> hholdDescInstance;      //version 11
         #endregion
 
         #region Constructors
@@ -71,8 +74,6 @@ namespace RegionDescriptionResource
         #region AApiVersionedFields
         public override int RecommendedApiVersion { get { return recommendedApiVersion; } }
 
-        public override List<string> ContentFields { get { return GetContentFields(requestedApiVersion, this.GetType()); } }
-
         #endregion
 
         #region Data I/O
@@ -81,8 +82,8 @@ namespace RegionDescriptionResource
             BinaryReader br = new BinaryReader(s);
 
             version = br.ReadUInt32();
-            if (checking) if (version != 9)
-                    throw new InvalidDataException(String.Format("{0}: unsupported 'version'.  Read '0x{1:X8}', supported: '0x00000009'", this.GetType().Name, version));
+          //  if (checking) if (version != 9)
+          //          throw new InvalidDataException(String.Format("{0}: unsupported 'version'.  Read '0x{1:X8}', supported: '0x00000009'", this.GetType().Name, version));
 
             regionNameKey = br.ReadUInt32();//                <format=hex>
             regionDescriptionKey = br.ReadUInt32();//         <format=hex>
@@ -102,11 +103,22 @@ namespace RegionDescriptionResource
 
             lightRotationOffset = br.ReadSingle();
 
-            isDestinationWorld = br.ReadByte();
-            isPlayerFacing = br.ReadByte();
+            if (version > 7)
+            {
+                isDestinationWorld = br.ReadByte();
+                isPlayerFacing = br.ReadByte();
 
-            parallaxLayerImageFile = new ParallaxLayerImageFile(requestedApiVersion, OnResourceChanged, s);
-            overlayImageFileNameHash = br.ReadUInt64();// <format=hex>
+                parallaxLayerImageFile = new ParallaxLayerImageFile(requestedApiVersion, OnResourceChanged, s);
+                overlayImageFileNameHash = br.ReadUInt64();// <format=hex>
+            }
+
+            if (version >= 11)
+            {
+                gfxInstance = br.ReadUInt64();
+                byte count = br.ReadByte();
+                hholdDescInstance = new SimpleList<ulong>(null);
+                for (int i = 0; i < count; i++) hholdDescInstance.Add(br.ReadUInt64());
+            }
         }
 
         protected override Stream UnParse()
@@ -133,11 +145,24 @@ namespace RegionDescriptionResource
 
             bw.Write(lightRotationOffset);
 
-            bw.Write(isDestinationWorld);
-            bw.Write(isPlayerFacing);
+            if (version > 7)
+            {
+                bw.Write(isDestinationWorld);
+                bw.Write(isPlayerFacing);
 
-            parallaxLayerImageFile.UnParse(ms);
-            bw.Write(overlayImageFileNameHash);
+                if (parallaxLayerImageFile == null) parallaxLayerImageFile = new ParallaxLayerImageFile(1, null);
+                parallaxLayerImageFile.UnParse(ms);
+                bw.Write(overlayImageFileNameHash);
+            }
+
+            if (version >= 11)
+            {
+                bw.Write(this.gfxInstance);
+                if (hholdDescInstance == null) hholdDescInstance = new SimpleList<ulong>(null);
+                byte count = (byte)this.hholdDescInstance.Count;
+                bw.Write(count);
+                for (int i = 0; i < count; i++) bw.Write(hholdDescInstance[i]);
+            }
             
             bw.Flush();
             return ms;
@@ -244,6 +269,7 @@ namespace RegionDescriptionResource
 
             public string Value { get { return ValueBuilder; } }
         }
+
         #endregion
 
         #region Content Fields
@@ -256,7 +282,7 @@ namespace RegionDescriptionResource
         [ElementPriority(3)]
         public UInt32 RegionDescriptionKey { get { return regionDescriptionKey; } set { if (regionDescriptionKey != value) { regionDescriptionKey = value; OnResourceChanged(this, EventArgs.Empty); } } }
         [ElementPriority(4)]
-        public UInt32 SimoleonPrice { get { return version; } set { if (simoleonPrice != value) { simoleonPrice = value; OnResourceChanged(this, EventArgs.Empty); } } }
+        public UInt32 SimoleonPrice { get { return simoleonPrice; } set { if (simoleonPrice != value) { simoleonPrice = value; OnResourceChanged(this, EventArgs.Empty); } } }
         [ElementPriority(5)]
         public UInt32 MDevCategoryFlags { get { return mDevCategoryFlags; } set { if (mDevCategoryFlags != value) { mDevCategoryFlags = value; OnResourceChanged(this, EventArgs.Empty); } } }
         [ElementPriority(6)]
@@ -287,9 +313,34 @@ namespace RegionDescriptionResource
         public ParallaxLayerImageFile ParallaxLayerImageFileNameHash { get { return parallaxLayerImageFile; } set { if (!parallaxLayerImageFile.Equals(value)) { parallaxLayerImageFile = new ParallaxLayerImageFile(requestedApiVersion, OnResourceChanged, value); OnResourceChanged(this, EventArgs.Empty); } } }
         [ElementPriority(19)]
         public UInt64 OverlayImageFileNameHash { get { return overlayImageFileNameHash; } set { if (overlayImageFileNameHash != value) { overlayImageFileNameHash = value; OnResourceChanged(this, EventArgs.Empty); } } }
+        [ElementPriority(20)]
+        public UInt64 MapFlashInstanceID { get { return gfxInstance; } set { if (gfxInstance != value) { gfxInstance = value; OnResourceChanged(this, EventArgs.Empty); } } }
+        [ElementPriority(21)]
+        public SimpleList<UInt64> HouseHoldDescriptionInstanceID { get { return hholdDescInstance; } set { if (hholdDescInstance != value) { hholdDescInstance = value; OnResourceChanged(this, EventArgs.Empty); } } }
         #endregion
 
         public string Value { get { return this.ValueBuilder; } }
+
+        public override List<string> ContentFields
+        {
+            get
+            {
+                var res = base.ContentFields;
+                if (this.version <= 7)
+                {
+                    res.Remove("IsDestinationWorld");
+                    res.Remove("IsPlayerFacing");
+                    res.Remove("ParallaxLayerImageFileNameHash");
+                    res.Remove("OverlayImageFileNameHash");
+                }
+                if (this.version < 11)
+                {
+                    res.Remove("MapFlashInstanceID");
+                    res.Remove("HouseHoldDescriptionInstanceID");
+                }
+                return res;
+            }
+        }
     }
 
     public class RegionDescriptionResourceHandler : AResourceHandler
