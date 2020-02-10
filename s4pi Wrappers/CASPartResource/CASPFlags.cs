@@ -169,6 +169,8 @@ namespace CASPartResource
     [Flags]
     public enum OccultTypesDisabled : uint
     {
+        Spellcaster = 1 << 4,
+        Mermaid = 1 << 3,
         Vampire = 1 << 2,
         Alien = 1 << 1,
         Human = 1
