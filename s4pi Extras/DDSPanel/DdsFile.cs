@@ -1067,9 +1067,18 @@ namespace System.Drawing
                 throw new FormatException("File is not a supported DDS format");
             int w = (int)header.width;
             int h = (int)header.height;
-            List<uint> pixels = new List<uint>();
+         //   List<uint> pixels = new List<uint>();
             uint buffersize = header.DataSize;
             uint numberMipMaps = Math.Max(header.NumMipMaps, 1);
+            int dataLen = 0;
+            int wtmp = w;
+            int htmp = h;
+            for (uint i = 0; i < numberMipMaps; i++)
+            {
+                dataLen += wtmp * htmp;
+                wtmp = Math.Max(wtmp / 2, 1);
+                htmp = Math.Max(htmp / 2, 1);
+            }
 
             if (header.IsBlockCompressed)
             {
@@ -1079,6 +1088,10 @@ namespace System.Drawing
                 else if (header.FileFormat == DdsFormat.ATI2) minBlockSize = 16;
                 else if (header.SquishFourCC == DdsSquish.SquishFlags.kDxt1) minBlockSize = 8;
                 else minBlockSize = 16;
+
+                uint[] pixels = new uint[dataLen];
+                uint marker = 0;
+
                 for (int m = 0; m < numberMipMaps; m++)
                 {
                     byte[] buffer = new byte[buffersize];
@@ -1105,16 +1118,22 @@ namespace System.Drawing
                     //    tmp[index] = decoder(BitConverter.ToUInt32(pixelData, index));
                     //    index++;
                     //}
-                    pixels.AddRange(tmp);
+                //    pixels.AddRange(tmp);
+                    Array.Copy(tmp, 0, pixels, marker, tmp.Length);
+                    marker += (uint)tmp.Length;
                     w = Math.Max(w / 2, 1);
                     h = Math.Max(h / 2, 1);
                     buffersize = Math.Max(buffersize / 4, minBlockSize);
                 }
-                baseImage = pixels.ToArray();
+                baseImage = pixels;
             }
             else
             {
                 int pixelSize = (int)header.UncompressedPixelSize;
+
+                uint[] pixels = new uint[dataLen];
+                uint marker = 0;
+
                 // Convert encoded data to ARGB uint array
                 for (int m = 0; m < numberMipMaps; m++)
                 {
@@ -1143,12 +1162,14 @@ namespace System.Drawing
                             tmp[destPixelOffset] = decoder(pixelColour);
                         }
                     }
-                    pixels.AddRange(tmp);
+                  //  pixels.AddRange(tmp);
+                    Array.Copy(tmp, 0, pixels, marker, tmp.Length);
+                    marker += (uint)tmp.Length;
                     w = Math.Max(w / 2, 1);
                     h = Math.Max(h / 2, 1);
                   //  buffersize = Math.Max(buffersize / 4, (uint)pixelSize);
                 }
-                baseImage = pixels.ToArray();
+                baseImage = pixels;
             }
         }
 
