@@ -111,6 +111,10 @@ namespace CatalogResource
             get
             {
                 List<string> res = base.ContentFields;
+                if (this.version >= 6)
+                {
+                    res.Remove("Unk02");
+                }
                 return res;
             }
         }
@@ -125,7 +129,7 @@ namespace CatalogResource
             this.version = br.ReadUInt32();
             this.commonA = new CatalogCommon(kRecommendedApiVersion, this.OnResourceChanged, s);
             this.unk01 = br.ReadByte();
-            this.unk02 = br.ReadByte();
+            if (version < 6) this.unk02 = br.ReadByte();
             this.trimRef = new TGIBlock(kRecommendedApiVersion, this.OnResourceChanged, TGIBlock.Order.ITG, s);
             this.materialVariant = br.ReadUInt32();
             this.modlRef = new TGIBlock(kRecommendedApiVersion, this.OnResourceChanged, TGIBlock.Order.ITG, s);
@@ -141,7 +145,7 @@ namespace CatalogResource
             if (this.commonA == null) { this.commonA = new CatalogCommon(kRecommendedApiVersion, this.OnResourceChanged); }
             this.commonA.UnParse(s);
             bw.Write(this.unk01);
-            bw.Write(this.unk02);
+            if (version < 6) bw.Write(this.unk02);
             if (this.trimRef == null) { this.trimRef = new TGIBlock(kRecommendedApiVersion, this.OnResourceChanged, TGIBlock.Order.ITG); }
             this.trimRef.UnParse(s);
             bw.Write(this.materialVariant);

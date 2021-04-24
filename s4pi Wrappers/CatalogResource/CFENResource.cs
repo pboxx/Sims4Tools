@@ -38,6 +38,9 @@ namespace CatalogResource
         private SpnFenMODLEntryList modlEntryList02;
         private SpnFenMODLEntryList modlEntryList03;
         private SpnFenMODLEntryList modlEntryList04;
+        private float unknown1;
+        private float unknown2;
+        private byte unknown3;
         private Gp7references refList;
         private byte unk01;
         private uint unk02;
@@ -49,6 +52,7 @@ namespace CatalogResource
         private WhateverList unkList03;
         private ColorList colors;
         private uint unk04;
+        private byte unk05;
 
         #endregion
 
@@ -96,73 +100,112 @@ namespace CatalogResource
             set { if (modlEntryList04 != value) { modlEntryList04 = new SpnFenMODLEntryList(this.OnResourceChanged, value); this.OnResourceChanged(this, EventArgs.Empty); } }
         }
         [ElementPriority(10)]
+        public float Unknown1
+        {
+            get { return unknown1; }
+            set { if (unknown1 != value) { unknown1 = value; this.OnResourceChanged(this, EventArgs.Empty); } }
+        }
+        [ElementPriority(11)]
+        public float Unknown2
+        {
+            get { return unknown2; }
+            set { if (unknown2 != value) { unknown2 = value; this.OnResourceChanged(this, EventArgs.Empty); } }
+        }
+        [ElementPriority(12)]
+        public byte Unknown3
+        {
+            get { return unknown3; }
+            set { if (unknown3 != value) { unknown3 = value; this.OnResourceChanged(this, EventArgs.Empty); } }
+        }
+        [ElementPriority(13)]
         public Gp7references ReferenceList
         {
             get { return refList; }
             set { if (refList != value) { refList = new Gp7references(kRecommendedApiVersion,this.OnResourceChanged, value); this.OnResourceChanged(this, EventArgs.Empty); } }
         }
-        [ElementPriority(12)]
+        [ElementPriority(14)]
         public byte Unk01
         {
             get { return unk01; }
             set { if (unk01 != value) { unk01 = value; this.OnResourceChanged(this, EventArgs.Empty); } }
         }
-        [ElementPriority(13)]
+        [ElementPriority(15)]
         public uint Unk02
         {
             get { return unk02; }
             set { if (unk02 != value) { unk02 = value; this.OnResourceChanged(this, EventArgs.Empty); } }
         }
-        [ElementPriority(14)]
+        [ElementPriority(16)]
         public uint MaterialVariant
         {
             get { return materialVariant; }
             set { if (materialVariant != value) { materialVariant = value; this.OnResourceChanged(this, EventArgs.Empty); } }
         }
-        [ElementPriority(15)]
+        [ElementPriority(17)]
         public ulong SwatchGrouping//UnkIID01
         {
             get { return swatchGrouping; }
             set { if (swatchGrouping != value) { swatchGrouping = value; this.OnResourceChanged(this, EventArgs.Empty); } }
         }
-        [ElementPriority(16)]
+        [ElementPriority(18)]
         public TGIBlock Slot
         {
             get { return slot; }
             set { if (slot != value) { slot = new TGIBlock(kRecommendedApiVersion,this.OnResourceChanged, TGIBlock.Order.ITG, value.ResourceType,value.ResourceGroup,value.Instance); this.OnResourceChanged(this, EventArgs.Empty); } }
         }
-        [ElementPriority(17)]
+        [ElementPriority(19)]
         public WhateverList UnkList01
         {
             get { return unkList01; }
             set { if (unkList01 != value) { unkList01 = new WhateverList(this.OnResourceChanged, value); this.OnResourceChanged(this, EventArgs.Empty); } }
         }
-        [ElementPriority(18)]
+        [ElementPriority(20)]
         public WhateverList UnkList02
         {
             get { return unkList02; }
             set { if (unkList02 != value) { unkList02 = new WhateverList(this.OnResourceChanged, value); this.OnResourceChanged(this, EventArgs.Empty); } }
         }
-        [ElementPriority(19)]
+        [ElementPriority(21)]
         public WhateverList UnkList03
         {
             get { return unkList03; }
             set { if (unkList03 != value) { unkList03 = new WhateverList(this.OnResourceChanged, value); this.OnResourceChanged(this, EventArgs.Empty); } }
         }
-        [ElementPriority(20)]
+        [ElementPriority(22)]
         public ColorList Colors
         {
             get { return colors; }
             set { if (colors != value) { colors = new ColorList(this.OnResourceChanged, value); this.OnResourceChanged(this, EventArgs.Empty); } }
         }
-        [ElementPriority(21)]
+        [ElementPriority(23)]
         public uint Unk04
         {
             get { return unk04; }
             set { if (unk04 != value) { unk04 = value; this.OnResourceChanged(this, EventArgs.Empty); } }
         }
+        [ElementPriority(24)]
+        public byte Unk05
+        {
+            get { return unk05; }
+            set { if (unk05 != value) { unk05 = value; this.OnResourceChanged(this, EventArgs.Empty); } }
+        }
 
         public string Value { get { return ValueBuilder; } }
+
+        public override List<string> ContentFields
+        {
+            get
+            {
+                List<string> res = base.ContentFields;
+                if (this.version < 12)
+                {
+                    res.Remove("Unknown1");
+                    res.Remove("Unknown2");
+                    res.Remove("Unknown3");
+                }
+                return res;
+            }
+        }
 
         #endregion
 
@@ -177,6 +220,12 @@ namespace CatalogResource
             this.modlEntryList02 = new SpnFenMODLEntryList(this.OnResourceChanged, s);
             this.modlEntryList03 = new SpnFenMODLEntryList(this.OnResourceChanged, s);
             this.modlEntryList04 = new SpnFenMODLEntryList(this.OnResourceChanged, s);
+            if (this.version >= 12)
+            {
+                this.unknown1 = br.ReadSingle();
+                this.unknown2 = br.ReadSingle();
+                this.unknown3 = br.ReadByte();
+            }
             this.refList = new Gp7references(kRecommendedApiVersion, this.OnResourceChanged, s);
             this.unk01 = br.ReadByte();
             this.unk02 = br.ReadUInt32();
@@ -188,6 +237,7 @@ namespace CatalogResource
             this.unkList03 = new WhateverList(this.OnResourceChanged, s);
             this.colors = new ColorList(this.OnResourceChanged, s);
             this.unk04 = br.ReadUInt32();
+            if (this.version >= 12) this.unk05 = br.ReadByte();
         }
 
         protected override Stream UnParse()
@@ -206,6 +256,12 @@ namespace CatalogResource
             if (this.modlEntryList04 == null) { this.modlEntryList04 = new SpnFenMODLEntryList(this.OnResourceChanged); }
             this.modlEntryList04.UnParse(s);
             if (this.refList == null) { this.refList = new Gp7references(kRecommendedApiVersion, this.OnResourceChanged); }
+            if (this.version >= 12)
+            {
+                bw.Write(this.unknown1);
+                bw.Write(this.unknown2);
+                bw.Write(this.unknown3);
+            }
             this.refList.UnParse(s);
             bw.Write(this.unk01);
             bw.Write(this.unk02);
@@ -222,6 +278,7 @@ namespace CatalogResource
             if (this.colors == null) { this.colors = new ColorList(this.OnResourceChanged); }
             this.colors.UnParse(s);
             bw.Write(this.unk04);
+            if (this.version >= 12) bw.Write(this.unk05);
             return s;
         }
 

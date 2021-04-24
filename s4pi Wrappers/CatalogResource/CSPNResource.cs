@@ -38,6 +38,9 @@ namespace CatalogResource
         private SpnFenMODLEntryList modlEntryList02;
         private SpnFenMODLEntryList modlEntryList03;
         private SpnFenMODLEntryList modlEntryList04;
+        private float unknown1;
+        private float unknown2;
+        private byte unknown3;
         private Gp7references refList;
         private uint materialVariant;
         private ulong unkIID01;
@@ -89,12 +92,30 @@ namespace CatalogResource
             set { if (modlEntryList04 != value) { modlEntryList04 = new SpnFenMODLEntryList(this.OnResourceChanged, value); this.OnResourceChanged(this, EventArgs.Empty); } }
         }
         [ElementPriority(10)]
+        public float Unknown1
+        {
+            get { return unknown1; }
+            set { if (unknown1 != value) { unknown1 = value; this.OnResourceChanged(this, EventArgs.Empty); } }
+        }
+        [ElementPriority(11)]
+        public float Unknown2
+        {
+            get { return unknown2; }
+            set { if (unknown2 != value) { unknown2 = value; this.OnResourceChanged(this, EventArgs.Empty); } }
+        }
+        [ElementPriority(12)]
+        public byte Unknown3
+        {
+            get { return unknown3; }
+            set { if (unknown3 != value) { unknown3 = value; this.OnResourceChanged(this, EventArgs.Empty); } }
+        }
+        [ElementPriority(13)]
         public Gp7references ReferenceList
         {
             get { return refList; }
             set { if (refList != value) { refList = new Gp7references(kRecommendedApiVersion,this.OnResourceChanged, value); this.OnResourceChanged(this, EventArgs.Empty); } }
         }
-        [ElementPriority(11)]
+        [ElementPriority(14)]
         public uint MaterialVariant
         {
             get { return materialVariant; }
@@ -115,6 +136,21 @@ namespace CatalogResource
 
         public string Value { get { return ValueBuilder; } }
 
+        public override List<string> ContentFields
+        {
+            get
+            {
+                List<string> res = base.ContentFields;
+                if (this.version < 8)
+                {
+                    res.Remove("Unknown1");
+                    res.Remove("Unknown2");
+                    res.Remove("Unknown3");
+                }
+                return res;
+            }
+        }
+
         #endregion
 
         #region Data I/O
@@ -128,6 +164,12 @@ namespace CatalogResource
             this.modlEntryList02 = new SpnFenMODLEntryList(this.OnResourceChanged, s);
             this.modlEntryList03 = new SpnFenMODLEntryList(this.OnResourceChanged, s);
             this.modlEntryList04 = new SpnFenMODLEntryList(this.OnResourceChanged, s);
+            if (version >= 8)
+            {
+                this.unknown1 = br.ReadSingle();
+                this.unknown2 = br.ReadSingle();
+                this.unknown3 = br.ReadByte();
+            }
             this.refList = new Gp7references(kRecommendedApiVersion, this.OnResourceChanged, s);
             this.materialVariant = br.ReadUInt32();
             this.unkIID01 = br.ReadUInt64();
@@ -149,6 +191,12 @@ namespace CatalogResource
             this.modlEntryList03.UnParse(s);
             if (modlEntryList04 == null) { modlEntryList04 = new SpnFenMODLEntryList(this.OnResourceChanged); }
             this.modlEntryList04.UnParse(s);
+            if (version >= 8)
+            {
+                bw.Write(this.unknown1);
+                bw.Write(this.unknown2);
+                bw.Write(this.unknown3);
+            }
             if (this.refList == null) { this.refList = new Gp7references(kRecommendedApiVersion, this.OnResourceChanged); }
             this.refList.UnParse(s);
             bw.Write(this.materialVariant);

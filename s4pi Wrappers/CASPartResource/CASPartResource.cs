@@ -62,7 +62,8 @@ namespace CASPartResource
         private FlagList flagList;                  // property 16-bit tag / 32-bit value pairs
         private uint deprecatedPrice;               // deprecated
         private uint partTitleKey;
-        private uint partDesptionKey;
+        private uint partDescriptionKey;
+        private uint createDescriptionKey;          // added in v 0x2B
         private byte uniqueTextureSpace;
         private BodyType bodyType;
         private BodySubType bodySubType;            // cmar - changed from unused with V 0x25
@@ -84,6 +85,10 @@ namespace CASPartResource
         private OccultTypesDisabled hideForOccultFlags; // cmar = added V 0x1F
         private UInt64 oppositeGenderPart;          // Version 0x28
         private UInt64 fallbackPart;                // Version 0x28
+        OpacitySettings opacitySlider;     //V 0x2C
+        SliderSettings hueSlider;           // "
+        SliderSettings saturationSlider;    // "
+        SliderSettings brightnessSlider;    // "                   // Version 0x2C - 11 floats
         private byte nakedKey;
         private byte parentKey;
         private int sortLayer;
@@ -150,7 +155,8 @@ namespace CASPartResource
 
             this.deprecatedPrice = r.ReadUInt32();
             this.partTitleKey = r.ReadUInt32();
-            this.partDesptionKey = r.ReadUInt32();
+            this.partDescriptionKey = r.ReadUInt32();
+            if (this.version >= 43) this.createDescriptionKey = r.ReadUInt32();
             this.uniqueTextureSpace = r.ReadByte();
             this.bodyType = (BodyType)r.ReadInt32();
             this.bodySubType = (BodySubType)r.ReadInt32();
@@ -202,6 +208,14 @@ namespace CASPartResource
             {
                 fallbackPart = r.ReadUInt64();
             }
+            if (version >= 44)
+            {
+                opacitySlider = new OpacitySettings(1, this.OnResourceChanged, s);
+                hueSlider = new SliderSettings(1, this.OnResourceChanged, s);
+                saturationSlider = new SliderSettings(1, this.OnResourceChanged, s);
+                brightnessSlider = new SliderSettings(1, this.OnResourceChanged, s);
+            }
+
             this.nakedKey = r.ReadByte();
             this.parentKey = r.ReadByte();
             this.sortLayer = r.ReadInt32();
@@ -280,7 +294,8 @@ namespace CASPartResource
             }
             w.Write(this.deprecatedPrice);
             w.Write(this.partTitleKey);
-            w.Write(this.partDesptionKey);
+            w.Write(this.partDescriptionKey);
+            if (this.version >= 43) w.Write(this.createDescriptionKey);
             w.Write(this.uniqueTextureSpace);
             w.Write((uint)this.bodyType);
             w.Write((uint)this.bodySubType);
@@ -333,6 +348,13 @@ namespace CASPartResource
             if (version >= 39)
             {
                 w.Write(fallbackPart);
+            }
+            if (version >= 44)
+            {
+                opacitySlider.UnParse(s);
+                hueSlider.UnParse(s);
+                saturationSlider.UnParse(s);
+                brightnessSlider.UnParse(s);
             }
             w.Write(this.nakedKey);
             w.Write(this.parentKey);
@@ -390,6 +412,186 @@ namespace CASPartResource
             }
 
             return s;
+        }
+
+        #endregion
+
+        #region Subtypes
+
+        public class OpacitySettings : AHandlerElement, IEquatable<OpacitySettings>
+        {
+            internal float minimum;
+            internal float increment;
+
+            public OpacitySettings(int apiVersion, EventHandler handler)
+                : base(apiVersion, handler)
+		    {
+                this.minimum = .2f;
+                this.increment = .05f;
+		    }
+
+            public OpacitySettings(int apiVersion, EventHandler handler, float minimum, float increment)
+                : base(apiVersion, handler)
+            {
+                this.minimum = minimum;
+                this.increment = increment;
+            }
+
+            public OpacitySettings(int apiVersion, EventHandler handler, Stream s)
+			: base(apiVersion, handler)
+		    {
+			    this.Parse(s);
+		    }
+
+            public void Parse(Stream s)
+            {
+                BinaryReader br = new BinaryReader(s);
+                this.minimum = br.ReadSingle();
+                this.increment = br.ReadSingle();
+            }
+
+            public void UnParse(Stream s)
+            {
+                BinaryWriter bw = new BinaryWriter(s);
+                bw.Write(this.minimum);
+                bw.Write(this.increment);
+            }
+
+            #region AHandlerElement Members
+
+            public override int RecommendedApiVersion
+            {
+                get { return recommendedApiVersion; }
+            }
+
+            public override List<string> ContentFields
+            {
+                get { return GetContentFields(this.requestedApiVersion, this.GetType()); }
+            }
+
+            #endregion
+
+            #region Content Fields
+
+            [ElementPriority(0)]
+            public float Minimum
+            {
+                get { return this.minimum; }
+                set
+                {
+                    if (!value.Equals(this.minimum))
+                    {
+                        this.minimum = value;
+                        this.OnElementChanged();
+                    }
+                }
+            }
+
+            [ElementPriority(2)]
+            public float Increment
+            {
+                get { return this.increment; }
+                set
+                {
+                    if (!value.Equals(this.increment))
+                    {
+                        this.increment = value;
+                        this.OnElementChanged();
+                    }
+                }
+            }
+
+            public string Value
+            {
+                get { return this.ValueBuilder; }
+            }
+
+            #endregion
+
+            #region IEquatable
+
+            public bool Equals(OpacitySettings other)
+            {
+                return this.minimum == other.minimum && this.increment == other.increment;
+            }
+
+            #endregion
+
+        }
+
+        public class SliderSettings : OpacitySettings
+        {
+            internal float maximum;
+
+            public SliderSettings(int apiVersion, EventHandler handler)
+                : base(apiVersion, handler)
+		    {
+                this.minimum = -.5f;
+                this.maximum = .5f;
+                this.increment = .05f;
+		    }
+
+            public SliderSettings(int apiVersion, EventHandler handler, float minimum, float maximum, float increment)
+                : base(apiVersion, handler)
+            {
+                this.minimum = minimum;
+                this.maximum = maximum;
+                this.increment = increment;
+            }
+
+            public SliderSettings(int apiVersion, EventHandler handler, Stream s)
+			: base(apiVersion, handler)
+		    {
+			    this.Parse(s);
+		    }
+
+            public void Parse(Stream s)
+            {
+                BinaryReader br = new BinaryReader(s);
+                this.minimum = br.ReadSingle();
+                this.maximum = br.ReadSingle();
+                this.increment = br.ReadSingle();
+            }
+
+            public void UnParse(Stream s)
+            {
+                BinaryWriter bw = new BinaryWriter(s);
+                bw.Write(this.minimum);
+                bw.Write(this.maximum);
+                bw.Write(this.increment);
+            }
+
+            #region Content Fields
+
+            [ElementPriority(0)]
+            public float Maximum
+            {
+                get { return this.maximum; }
+                set
+                {
+                    if (!value.Equals(this.maximum))
+                    {
+                        this.maximum = value;
+                        this.OnElementChanged();
+                    }
+                }
+            }
+
+            public string Value
+            {
+                get { return this.ValueBuilder; }
+            }
+
+            #endregion
+
+            #region IEquatable
+
+            public bool Equals(SliderSettings other)
+            {
+                return this.minimum == other.minimum && this.increment == other.increment && this.maximum == other.maximum;
+            }
+
+            #endregion
         }
 
         #endregion
@@ -612,18 +814,32 @@ namespace CASPartResource
         [ElementPriority(16)]
         public uint PartDescriptionKey
         {
-            get { return this.partDesptionKey; }
+            get { return this.partDescriptionKey; }
             set
             {
-                if (!value.Equals(this.partDesptionKey))
+                if (!value.Equals(this.partDescriptionKey))
                 {
-                    this.partDesptionKey = value;
+                    this.partDescriptionKey = value;
                 }
                 this.OnResourceChanged(this, EventArgs.Empty);
             }
         }
 
         [ElementPriority(17)]
+        public uint CreationDescriptionKey
+        {
+            get { return this.createDescriptionKey; }
+            set
+            {
+                if (!value.Equals(this.createDescriptionKey))
+                {
+                    this.createDescriptionKey = value;
+                }
+                this.OnResourceChanged(this, EventArgs.Empty);
+            }
+        }
+
+        [ElementPriority(18)]
         public byte UniqueTextureSpace
         {
             get { return this.uniqueTextureSpace; }
@@ -637,7 +853,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(18)]
+        [ElementPriority(19)]
         public BodyType BodyType
         {
             get { return this.bodyType; }
@@ -651,7 +867,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(19)]
+        [ElementPriority(20)]
         public BodySubType BodySubType
         {
             get { return this.bodySubType; }
@@ -665,7 +881,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(20)]
+        [ElementPriority(21)]
         public AgeGenderFlags AgeGender
         {
             get { return this.ageGender; }
@@ -679,7 +895,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(21)]
+        [ElementPriority(22)]
         public Species Species
         {
             get { return this.species; }
@@ -693,7 +909,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(22)]
+        [ElementPriority(23)]
         public short PackID
         {
             get { return this.packID; }
@@ -707,7 +923,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(23)]
+        [ElementPriority(24)]
         public PackFlag PackFlags
         {
             get { return this.packFlags; }
@@ -721,7 +937,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(24)]
+        [ElementPriority(25)]
         public byte[] Reserved2
         {
             get { return this.reserved2; }
@@ -732,7 +948,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(25)]
+        [ElementPriority(26)]
         public byte Unused2
         {
             get { return this.unused2; }
@@ -746,7 +962,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(26)]
+        [ElementPriority(27)]
         public byte Unused3
         {
             get { return this.unused3; }
@@ -760,7 +976,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(27)]
+        [ElementPriority(28)]
         public SwatchColorList SwatchColorCode
         {
             get { return this.swatchColorCode; }
@@ -774,7 +990,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(28), TGIBlockListContentField("TGIList")]
+        [ElementPriority(29), TGIBlockListContentField("TGIList")]
         public byte BuffResKey
         {
             get { return this.buffResKey; }
@@ -788,7 +1004,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(29), TGIBlockListContentField("TGIList")]
+        [ElementPriority(30), TGIBlockListContentField("TGIList")]
         public byte VarientThumbnailKey
         {
             get { return this.varientThumbnailKey; }
@@ -802,7 +1018,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(30)]
+        [ElementPriority(31)]
         public ulong VoiceEffectHash
         {
             get { return this.voiceEffectHash; }
@@ -816,7 +1032,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(31)]
+        [ElementPriority(32)]
         public uint MaterialSetUpperBodyHash
         {
             get { return this.materialSetUpperBodyHash; }
@@ -830,7 +1046,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(32)]
+        [ElementPriority(33)]
         public uint MaterialSetLowerBodyHash
         {
             get { return this.materialSetLowerBodyHash; }
@@ -844,7 +1060,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(33)]
+        [ElementPriority(34)]
         public uint MaterialSetShoesHash
         {
             get { return this.materialSetShoesHash; }
@@ -858,7 +1074,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(34)]
+        [ElementPriority(35)]
         public OccultTypesDisabled HideForOccultFlags
         {
             get { return this.hideForOccultFlags; }
@@ -872,7 +1088,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(35)]
+        [ElementPriority(36)]
         public ulong OppositeGenderCASPart
         {
             get { return this.oppositeGenderPart; }
@@ -886,7 +1102,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(36)]
+        [ElementPriority(37)]
         public ulong FallbackCASPart
         {
             get { return this.fallbackPart; }
@@ -900,7 +1116,63 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(37), TGIBlockListContentField("TGIList")]
+        [ElementPriority(38)]
+        public OpacitySettings OpacitySlider
+        {
+            get { return this.opacitySlider; }
+            set
+            {
+                if (!value.Equals(this.opacitySlider))
+                {
+                    this.opacitySlider = value;
+                }
+                this.OnResourceChanged(this, EventArgs.Empty);
+            }
+        }
+
+        [ElementPriority(39)]
+        public SliderSettings HueSlider
+        {
+            get { return this.hueSlider; }
+            set
+            {
+                if (!value.Equals(this.hueSlider))
+                {
+                    this.hueSlider = value;
+                }
+                this.OnResourceChanged(this, EventArgs.Empty);
+            }
+        }
+
+        [ElementPriority(40)]
+        public SliderSettings SaturationSlider
+        {
+            get { return this.saturationSlider; }
+            set
+            {
+                if (!value.Equals(this.saturationSlider))
+                {
+                    this.saturationSlider = value;
+                }
+                this.OnResourceChanged(this, EventArgs.Empty);
+            }
+        }
+
+        [ElementPriority(41)]
+        public SliderSettings BrightnessSlider
+        {
+            get { return this.brightnessSlider; }
+            set
+            {
+                if (!value.Equals(this.brightnessSlider))
+                {
+                    this.brightnessSlider = value;
+                }
+                this.OnResourceChanged(this, EventArgs.Empty);
+            }
+        }
+
+        [ElementPriority(42), TGIBlockListContentField("TGIList")]
         public byte NakedKey
         {
             get { return this.nakedKey; }
@@ -914,7 +1186,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(38), TGIBlockListContentField("TGIList")]
+        [ElementPriority(43), TGIBlockListContentField("TGIList")]
         public byte ParentKey
         {
             get { return this.parentKey; }
@@ -928,7 +1200,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(39)]
+        [ElementPriority(44)]
         public int SortLayer
         {
             get { return this.sortLayer; }
@@ -942,7 +1214,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(40)]
+        [ElementPriority(45)]
         public LODBlockList LodBlockList
         {
             get { return this.lodBlockList; }
@@ -956,7 +1228,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(41), TGIBlockListContentField("TGIList")]
+        [ElementPriority(46), TGIBlockListContentField("TGIList")]
         public SimpleList<byte> SlotKey
         {
             get { return this.slotKey; }
@@ -970,7 +1242,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(42), TGIBlockListContentField("TGIList")]
+        [ElementPriority(47), TGIBlockListContentField("TGIList")]
         public byte DiffuseKey
         {
             get { return this.diffuseKey; }
@@ -984,7 +1256,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(43), TGIBlockListContentField("TGIList")]
+        [ElementPriority(48), TGIBlockListContentField("TGIList")]
         public byte ShadowKey
         {
             get { return this.shadowKey; }
@@ -998,7 +1270,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(44)]
+        [ElementPriority(49)]
         public byte CompositionMethod
         {
             get { return this.compositionMethod; }
@@ -1012,7 +1284,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(45), TGIBlockListContentField("TGIList")]
+        [ElementPriority(50), TGIBlockListContentField("TGIList")]
         public byte RegionMapKey
         {
             get { return this.regionMapKey; }
@@ -1026,7 +1298,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(46)]
+        [ElementPriority(51)]
         public OverrideList Overrides
         {
             get { return this.overrides; }
@@ -1040,7 +1312,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(47), TGIBlockListContentField("TGIList")]
+        [ElementPriority(52), TGIBlockListContentField("TGIList")]
         public byte NormalMapKey
         {
             get { return this.normalMapKey; }
@@ -1054,7 +1326,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(48), TGIBlockListContentField("TGIList")]
+        [ElementPriority(53), TGIBlockListContentField("TGIList")]
         public byte SpecularMapKey
         {
             get { return this.specularMapKey; }
@@ -1068,7 +1340,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(49)]
+        [ElementPriority(54)]
         public BodyType SharedUVMapSpace
         {
             get
@@ -1089,7 +1361,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(50), TGIBlockListContentField("TGIList")]
+        [ElementPriority(55), TGIBlockListContentField("TGIList")]
         public byte EmissionMapKey
         {
             get { return this.emissionMapKey; }
@@ -1102,7 +1374,7 @@ namespace CASPartResource
                 this.OnResourceChanged(this, EventArgs.Empty);
             }
         }
-        [ElementPriority(51)]
+        [ElementPriority(56)]
         public byte ReservedByte
         {
             get { return this.reservedByte; }
@@ -1116,7 +1388,7 @@ namespace CASPartResource
             }
         }
 
-        [ElementPriority(52)]
+        [ElementPriority(57)]
         public CountedTGIBlockList TGIList
         {
             get { return this.tgiList; }
@@ -1187,6 +1459,17 @@ namespace CASPartResource
                 if (this.version < 0x2A)
                 {
                     res.Remove("ReservedByte");
+                }
+                if (this.version < 0x2B)
+                {
+                    res.Remove("CreationDescriptionKey");
+                }
+                if (this.version < 0x2C)
+                {
+                    res.Remove("OpacitySlider");
+                    res.Remove("HueSlider");
+                    res.Remove("SaturationSlider");
+                    res.Remove("BrightnessSlider");
                 }
                 return res;
             }

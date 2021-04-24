@@ -55,6 +55,10 @@ namespace CASPartResource
         private float sortOrder;
         private float makeupOpacity2;
         private ulong tuningInstance;
+        private SkintoneType skinType;
+        private float sliderLow;
+        private float sliderHigh;
+        private float sliderIncrement;
 
         public SkinToneResource(int APIversion, Stream s) : base(APIversion, s)
         {
@@ -102,6 +106,13 @@ namespace CASPartResource
             {
                 this.tuningInstance = reader.ReadUInt64();
             }
+            if (this.version > 10)
+            {
+                this.skinType = (SkintoneType)reader.ReadUInt16();
+                this.sliderLow = reader.ReadSingle();
+                this.sliderHigh = reader.ReadSingle();
+                this.sliderIncrement = reader.ReadSingle();
+            }
         }
 
         protected override Stream UnParse()
@@ -147,6 +158,13 @@ namespace CASPartResource
             if (this.version >= 8)
             {
                 w.Write(this.tuningInstance);
+            }
+            if (this.version > 10)
+            {
+                w.Write((ushort)this.skinType);
+                w.Write(this.sliderLow);
+                w.Write(this.sliderHigh);
+                w.Write(this.sliderIncrement);
             }
             return ms;
         }
@@ -416,6 +434,14 @@ namespace CASPartResource
             }
         }
 
+        public enum SkintoneType : ushort
+        {
+            Warm = 1,
+            Neutral = 2,
+            Cool = 3,
+            Miscellaneous = 4
+        }
+
         #endregion
 
         #region Content Fields
@@ -601,6 +627,60 @@ namespace CASPartResource
                 }
             }
         }
+        [ElementPriority(12)]
+        public SkintoneType SkinType
+        {
+            get { return this.skinType; }
+            set
+            {
+                if (!this.skinType.Equals(value))
+                {
+                    this.skinType = value;
+                    this.OnResourceChanged(this, EventArgs.Empty);
+                }
+            }
+        }
+        [ElementPriority(13)]
+        public float SliderLow
+        {
+            get { return this.sliderLow; }
+            set
+            {
+                if (!this.sliderLow.Equals(value))
+                {
+                    this.sliderLow = value;
+                    this.OnResourceChanged(this, EventArgs.Empty);
+                }
+            }
+        }
+
+        [ElementPriority(14)]
+        public float SliderHigh
+        {
+            get { return this.sliderHigh; }
+            set
+            {
+                if (!this.sliderHigh.Equals(value))
+                {
+                    this.sliderHigh = value;
+                    this.OnResourceChanged(this, EventArgs.Empty);
+                }
+            }
+        }
+
+        [ElementPriority(15)]
+        public float SliderIncrement
+        {
+            get { return this.sliderIncrement; }
+            set
+            {
+                if (!this.sliderIncrement.Equals(value))
+                {
+                    this.sliderIncrement = value;
+                    this.OnResourceChanged(this, EventArgs.Empty);
+                }
+            }
+        }
 
         public string Value
         {
@@ -625,6 +705,13 @@ namespace CASPartResource
                 else
                 {
                     res.Remove("SkinSets");
+                }
+                if (this.version < 11)
+                {
+                    res.Remove("SkinType");
+                    res.Remove("SliderLow");
+                    res.Remove("SliderHigh");
+                    res.Remove("SliderIncrement");
                 }
                 return res;
             }

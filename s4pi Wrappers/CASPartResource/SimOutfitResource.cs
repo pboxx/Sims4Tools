@@ -48,6 +48,7 @@ namespace CASPartResource
         private Species species;
         private uint unknown1;
         private ulong skinToneReference;
+        private float skinToneShift;
         private CoatOverlayReferenceList coatLayers;
 
         private ByteIndexList sculptReference;
@@ -112,6 +113,10 @@ namespace CASPartResource
                 this.unknown1 = r.ReadUInt32();
             }
             this.skinToneReference = r.ReadUInt64();
+            if (this.version >= 28)
+            {
+                this.skinToneShift = r.ReadSingle();
+            }
             if (this.version >= 24)
             {
                 this.coatLayers = new CoatOverlayReferenceList(OnResourceChanged, s);
@@ -141,9 +146,9 @@ namespace CASPartResource
             this.fitValue2 = r.ReadSingle();
             this.leanValue2 = r.ReadSingle();
             this.bonyValue2 = r.ReadSingle();
-            this.caspReferences2 = new CaspReferenceList(OnResourceChanged, tgiList);
+            this.caspReferences2 = new CaspReferenceList(OnResourceChanged, tgiList, false);
             byte count = r.ReadByte();
-            for (int i = 0; i < count; i++) caspReferences2.Add(new CaspReference(RecommendedApiVersion, OnResourceChanged, s, tgiList));
+            for (int i = 0; i < count; i++) caspReferences2.Add(new CaspReference(RecommendedApiVersion, OnResourceChanged, s, tgiList, false));
             this.voiceActor2 = r.ReadUInt32();
             this.voicePitch2 = r.ReadSingle();
 
@@ -178,6 +183,10 @@ namespace CASPartResource
                 w.Write(this.unknown1);
             }
             w.Write(skinToneReference);
+            if (this.version >= 28)
+            {
+                w.Write(this.skinToneShift);
+            }
             if (this.version >= 24)
             {
                 this.coatLayers.UnParse(ms);
@@ -257,7 +266,6 @@ namespace CASPartResource
                 w.Write(this.sliderValue);
             }
 
-
             const int recommendedApiVersion = 1;
             public override int RecommendedApiVersion { get { return recommendedApiVersion; } }
             public override List<string> ContentFields { get { var res = GetContentFields(requestedApiVersion, this.GetType()); res.Remove("ParentTGIList"); return res; } }
@@ -332,7 +340,7 @@ namespace CASPartResource
                     this.matchHair = r.ReadBoolean();
                   //  this.unknownBlock = new DataBlobHandler(recommendedApiVersion, handler, r.ReadBytes(17));
                 }
-                this.CasPartList = new CaspReferenceList(handler, s, tgiList);
+                this.CasPartList = new CaspReferenceList(handler, s, tgiList, version >= 28);
             }
 
             public void UnParse(Stream s)
@@ -395,16 +403,19 @@ namespace CASPartResource
         public class CaspReference : AHandlerElement, IEquatable<CaspReference>
         {
             public CountedTGIBlockList ParentTGIList { get; private set; }
-            public CaspReference(int apiVersion, EventHandler handler, CountedTGIBlockList tgiList) : base(apiVersion, handler) { this.ParentTGIList = tgiList; }
-            public CaspReference(int apiVersion, EventHandler handler, Stream s, CountedTGIBlockList tgiList) : base(apiVersion, handler) { this.ParentTGIList = tgiList; Parse(s); }
+            private bool hasShift;
+            public CaspReference(int apiVersion, EventHandler handler, CountedTGIBlockList tgiList, bool hasShift) : base(apiVersion, handler) { this.ParentTGIList = tgiList; this.hasShift = hasShift; }
+            public CaspReference(int apiVersion, EventHandler handler, Stream s, CountedTGIBlockList tgiList, bool hasShift) : base(apiVersion, handler) { this.ParentTGIList = tgiList; this.hasShift = hasShift; Parse(s); }
             private byte index;
-            private BodyType bodyType; 
+            private BodyType bodyType;
+            private ulong colorShift;
 
             public void Parse(Stream s)
             {
                 BinaryReader r = new BinaryReader(s);
                 this.index = r.ReadByte();
                 this.bodyType = (BodyType) r.ReadUInt32();
+                if (this.hasShift) this.colorShift = r.ReadUInt64();
             }
 
             public void UnParse(Stream s)
@@ -412,15 +423,18 @@ namespace CASPartResource
                 BinaryWriter w = new BinaryWriter(s);
                 w.Write(this.index);
                 w.Write((uint)this.bodyType);
+                if (this.hasShift) w.Write(this.colorShift);
             }
 
             const int recommendedApiVersion = 1;
             public override int RecommendedApiVersion { get { return recommendedApiVersion; } }
-            public override List<string> ContentFields { get { var res = GetContentFields(requestedApiVersion, this.GetType()); res.Remove("ParentTGIList"); return res; } }
+            public override List<string> ContentFields { get { var res = GetContentFields(requestedApiVersion, this.GetType()); res.Remove("ParentTGIList"); if (!hasShift) res.Remove("ColorShift"); return res; } }
             [ElementPriority(0), TGIBlockListContentField("ParentTGIList")]
             public byte TGIReference { get { return this.index; } set { if (!this.index.Equals(value)) { this.index = value; } } }
             [ElementPriority(1)]
             public BodyType CASP_BodyType { get { return this.bodyType; } set { if (!this.bodyType.Equals(value)) { this.bodyType = value; } } }
+            [ElementPriority(2)]
+            public ulong ColorShift { get { return this.colorShift; } set { if (!this.colorShift.Equals(value)) { this.colorShift = value; } } }
             public string Value { get { return ValueBuilder; } }
 
             #region IEquatable
@@ -441,9 +455,9 @@ namespace CASPartResource
             private uint version;
 
             public OutfitBlock(int apiVersion, EventHandler handler, CountedTGIBlockList tgiList, uint version) : base(apiVersion, handler) { this.tgiList = tgiList; this.version = version; }
-            public OutfitBlock(int apiVersion, EventHandler handler, Stream s, CountedTGIBlockList tgiList, uint version) : base(apiVersion, handler) { this.tgiList = tgiList; this.version = version; Parse(s, tgiList, version); }
+            public OutfitBlock(int apiVersion, EventHandler handler, Stream s, CountedTGIBlockList tgiList, uint version) : base(apiVersion, handler) { this.tgiList = tgiList; this.version = version; Parse(s); }
             
-            protected void Parse(Stream s, CountedTGIBlockList tgiList, uint version)
+            protected void Parse(Stream s)
             {
                 BinaryReader r = new BinaryReader(s);
                 this.category = (OutfitCategories)r.ReadByte();
@@ -466,7 +480,7 @@ namespace CASPartResource
             [ElementPriority(1)]
             public uint Unknown1 { get { return this.unknown1; } set { if (!this.unknown1.Equals(value)) { this.unknown1 = value; } } }
             [ElementPriority(2)]
-            public OutfitReferenceList UnknownReferenceList { get { return this.unknownReferenceList; } set { if (!this.unknownReferenceList.Equals(value)) { this.unknownReferenceList = value; } } }
+            public OutfitReferenceList OutfitsList { get { return this.unknownReferenceList; } set { if (!this.unknownReferenceList.Equals(value)) { this.unknownReferenceList = value; } } }
             const int recommendedApiVersion = 1;
             public override int RecommendedApiVersion { get { return recommendedApiVersion; } }
             public override List<string> ContentFields { get { return GetContentFields(requestedApiVersion, this.GetType()); } }
@@ -500,10 +514,10 @@ namespace CASPartResource
             private CountedTGIBlockList tgiList;
             private uint version;
             public OutfitBlockList(EventHandler handler, CountedTGIBlockList tgiList, uint version) : base(handler) { this.tgiList = tgiList; this.version = version; }
-            public OutfitBlockList(EventHandler handler, Stream s, CountedTGIBlockList tgiList, uint version) : this(handler, tgiList, version) { Parse(s, tgiList, version); }
+            public OutfitBlockList(EventHandler handler, Stream s, CountedTGIBlockList tgiList, uint version) : this(handler, tgiList, version) { Parse(s); }
 
             #region Data I/O
-            protected void Parse(Stream s, CountedTGIBlockList tgiList, uint version)
+            protected override void Parse(Stream s)
             {
                 BinaryReader r = new BinaryReader(s);
                 int count = r.ReadInt32();
@@ -525,15 +539,16 @@ namespace CASPartResource
         public class CaspReferenceList : DependentList<CaspReference>
         {
             private CountedTGIBlockList tgiList;
-            public CaspReferenceList(EventHandler handler, CountedTGIBlockList tgiList) : base(handler) { this.tgiList = tgiList; }
-            public CaspReferenceList(EventHandler handler, Stream s, CountedTGIBlockList tgiList) : this(handler, tgiList) { Parse(s, tgiList); }
+            private bool hasShift;
+            public CaspReferenceList(EventHandler handler, CountedTGIBlockList tgiList, bool hasShift) : base(handler) { this.tgiList = tgiList; this.hasShift = hasShift; }
+            public CaspReferenceList(EventHandler handler, Stream s, CountedTGIBlockList tgiList, bool hasShift) : this(handler, tgiList, hasShift) { Parse(s); }
 
             #region Data I/O
-            protected void Parse(Stream s, CountedTGIBlockList tgiList)
+            protected override void Parse(Stream s)
             {
                 BinaryReader r = new BinaryReader(s);
                 int count = r.ReadInt32();
-                for (int i = 0; i < count; i++) this.Add(new CaspReference(recommendedApiVersion, handler, s, this.tgiList));
+                for (int i = 0; i < count; i++) this.Add(new CaspReference(recommendedApiVersion, handler, s, this.tgiList, this.hasShift));
             }
 
             public override void UnParse(Stream s)
@@ -553,10 +568,10 @@ namespace CASPartResource
             private CountedTGIBlockList tgiList;
             private uint version;
             public OutfitReferenceList(EventHandler handler, CountedTGIBlockList tgiList, uint version) : base(handler) { this.tgiList = tgiList; this.version = version; }
-            public OutfitReferenceList(EventHandler handler, Stream s, CountedTGIBlockList tgiList, uint version) : this(handler, tgiList, version) { Parse(s, tgiList, version); }
+            public OutfitReferenceList(EventHandler handler, Stream s, CountedTGIBlockList tgiList, uint version) : this(handler, tgiList, version) { Parse(s); }
 
             #region Data I/O
-            protected void Parse(Stream s, CountedTGIBlockList tgiList, uint version)
+            protected void Parse(Stream s)
             {
                 BinaryReader r = new BinaryReader(s);
                 int count = r.ReadInt32();
@@ -676,6 +691,8 @@ namespace CASPartResource
         public uint Unknown1 { get { return this.unknown1; } set { if (!this.unknown1.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.unknown1 = value; } } }
         [ElementPriority(13)]
         public ulong SkinToneReference { get { return this.skinToneReference; } set { if (!this.skinToneReference.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.skinToneReference = value; } } }
+        [ElementPriority(14)]
+        public float SkinColorShift { get { return this.skinToneShift; } set { if (!this.skinToneShift.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.skinToneShift = value; } } }
         [ElementPriority(15)]
         public CoatOverlayReferenceList CoatLayers { get { return this.coatLayers; } set { if (this.coatLayers != value) { OnResourceChanged(this, EventArgs.Empty); this.coatLayers = value; } } }
         [ElementPriority(16)]
@@ -697,25 +714,25 @@ namespace CASPartResource
         [ElementPriority(24)]
         public OutfitBlockList OutfitsList { get { return this.outfitsList; } set { if (!this.outfitsList.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.outfitsList = value; } } }
         [ElementPriority(25)]
-        public ByteIndexList SculptReference2 { get { return this.sculptReference2; } set { if (!this.sculptReference2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.sculptReference2 = value; } } }
+        public ByteIndexList SculptReferenceGenetic { get { return this.sculptReference2; } set { if (!this.sculptReference2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.sculptReference2 = value; } } }
         [ElementPriority(26)]
-        public SliderReferenceList SimModifierReferencesFace2 { get { return this.sliderReferencesFace2; } set { if (!this.sliderReferencesFace2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.sliderReferencesFace2 = value; } } }
+        public SliderReferenceList SimModifierReferencesFaceGenetic { get { return this.sliderReferencesFace2; } set { if (!this.sliderReferencesFace2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.sliderReferencesFace2 = value; } } }
         [ElementPriority(27)]
-        public SliderReferenceList SimModifierReferencesBody2 { get { return this.sliderReferencesBody2; } set { if (!this.sliderReferencesBody2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.sliderReferencesBody2 = value; } } }
+        public SliderReferenceList SimModifierReferencesBodyGenetic { get { return this.sliderReferencesBody2; } set { if (!this.sliderReferencesBody2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.sliderReferencesBody2 = value; } } }
         [ElementPriority(28)]
-        public float HeavyValue2 { get { return this.heavyValue2; } set { if (!this.heavyValue2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.heavyValue2 = value; } } }
+        public float HeavyValueGenetic { get { return this.heavyValue2; } set { if (!this.heavyValue2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.heavyValue2 = value; } } }
         [ElementPriority(29)]
-        public float FitValue2 { get { return this.fitValue2; } set { if (!this.fitValue2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.fitValue2 = value; } } }
+        public float FitValueGenetic { get { return this.fitValue2; } set { if (!this.fitValue2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.fitValue2 = value; } } }
         [ElementPriority(30)]
-        public float LeanValue2 { get { return this.leanValue2; } set { if (!this.leanValue2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.leanValue2 = value; } } }
+        public float LeanValueGenetic { get { return this.leanValue2; } set { if (!this.leanValue2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.leanValue2 = value; } } }
         [ElementPriority(31)]
-        public float BonyValue2 { get { return this.bonyValue2; } set { if (!this.bonyValue2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.bonyValue2 = value; } } }
+        public float BonyValueGenetic { get { return this.bonyValue2; } set { if (!this.bonyValue2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.bonyValue2 = value; } } }
         [ElementPriority(32)]
-        public CaspReferenceList CASPReferences { get { return this.caspReferences2; } set { if (!this.caspReferences2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.caspReferences2 = value; } } }
+        public CaspReferenceList CASPReferencesGenetic { get { return this.caspReferences2; } set { if (!this.caspReferences2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.caspReferences2 = value; } } }
         [ElementPriority(33)]
-        public uint VoiceActor2 { get { return this.voiceActor2; } set { if (!this.voiceActor2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.voiceActor2 = value; } } }
+        public uint VoiceActorGenetic { get { return this.voiceActor2; } set { if (!this.voiceActor2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.voiceActor2 = value; } } }
         [ElementPriority(34)]
-        public float VoicePitch2 { get { return this.voicePitch2; } set { if (!this.voicePitch2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.voicePitch2 = value; } } }
+        public float VoicePitchGenetic { get { return this.voicePitch2; } set { if (!this.voicePitch2.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.voicePitch2 = value; } } }
         [ElementPriority(35)]
         public byte Flags { get { return this.flags; } set { if (!this.flags.Equals(value)) { OnResourceChanged(this, EventArgs.Empty); this.flags = value; } } }
         [ElementPriority(36)]
@@ -738,6 +755,10 @@ namespace CASPartResource
                 if (this.version < 24)
                 {
                     fields.Remove("CoatLayers");
+                }
+                if (this.version < 28)
+                {
+                    fields.Remove("SkinColorShift");
                 }
                 return fields;
             }
