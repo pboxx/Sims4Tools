@@ -1180,13 +1180,25 @@ namespace System.Drawing
             var encoder = header.Encoder;
             if (encoder == null)
                 throw new FormatException("File is not a supported DDS format");
-            List<byte> output = new List<byte>();
+          //  List<byte> output = new List<byte>();
+            byte[] output;
             int w = (int)header.width;
             int h = (int)header.height;
             int mipOffset = 0;
 
             if (header.IsBlockCompressed)
             {
+                int compressedSize = baseImage.Length;
+                if (header.FileFormat == DdsFormat.ATI1) compressedSize = compressedSize / 2;
+                else if (header.FileFormat == DdsFormat.ATI2) compressedSize = compressedSize / 1;
+                else
+                {
+                    if ((header.SquishFourCC & DdsSquish.SquishFlags.kDxt1) == 0) compressedSize = compressedSize / 1; // if not DXT1
+                    else compressedSize = compressedSize / 2;
+                }
+                output = new byte[compressedSize];
+                int mipStart = 0;
+
                 for (int m = 0; m < NumMipMaps; m++)
                 {
                     //get pixels for each mipmap
@@ -1209,7 +1221,9 @@ namespace System.Drawing
                     }
                     //if (buffer.Length != header.DataSize)
                     //    throw new Exception(String.Format("DdsSquish returned an unexpected buffer size, 0x{0:X8}.  Expected 0x{1:X8}", buffer.Length, header.DataSize));
-                    output.AddRange(buffer);
+                   // output.AddRange(buffer);
+                    Array.Copy(buffer, 0, output, mipStart, buffer.Length);
+                    mipStart += buffer.Length;
                     w = Math.Max(w / 2, 1);
                     h = Math.Max(h / 2, 1);
                     mipOffset += mipLength;
@@ -1218,6 +1232,8 @@ namespace System.Drawing
             else
             {
                 int pixelSize = (int)header.UncompressedPixelSize;
+                output = new byte[baseImage.Length * pixelSize];
+                int mipStart = 0;
                 for (int m = 0; m < NumMipMaps; m++)
                 {
                     int rowPitch = w * pixelSize;
@@ -1243,7 +1259,8 @@ namespace System.Drawing
                                 buffer[destPixelOffset + loop] = (byte)((pixelColour >> (8 * loop)) & 0xff);
                         }
                     }
-                    output.AddRange(buffer);
+                    Array.Copy(buffer, 0, output, mipStart, buffer.Length);
+                    mipStart += buffer.Length;
                     w = Math.Max(w / 2, 1);
                     h = Math.Max(h / 2, 1);
                     mipOffset += mipLength;
@@ -1251,7 +1268,7 @@ namespace System.Drawing
             }
 
             header.Write(s);
-            s.Write(output.ToArray(), 0, output.Count);
+            s.Write(output, 0, output.Length);
         }
 
         public int Height { get { return (int)header.height; } }
@@ -1932,7 +1949,13 @@ namespace System.Drawing
 
             Bitmap bitmap = new Bitmap(width, height, Imaging.PixelFormat.Format32bppArgb);
             System.Drawing.Imaging.BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), Imaging.ImageLockMode.WriteOnly, bitmap.PixelFormat);
-            System.Runtime.InteropServices.Marshal.Copy(destPixels, 0, bmpData.Scan0, destPixels.Length);
+            //System.Runtime.InteropServices.Marshal.Copy(destPixels, 0, bmpData.Scan0, destPixels.Length);
+            //bitmap.UnlockBits(bmpData);
+            int alphaWidth = Math.Abs(bmpData.Stride);
+            for (int i = 0; i < bmpData.Height; i++)
+            {
+                System.Runtime.InteropServices.Marshal.Copy(destPixels, i * alphaWidth, IntPtr.Add(bmpData.Scan0, i * bmpData.Stride), alphaWidth);
+            }
             bitmap.UnlockBits(bmpData);
 
             return bitmap;
@@ -1966,7 +1989,13 @@ namespace System.Drawing
 
             Bitmap bitmap = new Bitmap(width, height, Imaging.PixelFormat.Format32bppArgb);
             System.Drawing.Imaging.BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), Imaging.ImageLockMode.WriteOnly, bitmap.PixelFormat);
-            System.Runtime.InteropServices.Marshal.Copy(destPixels, 0, bmpData.Scan0, destPixels.Length);
+           // System.Runtime.InteropServices.Marshal.Copy(destPixels, 0, bmpData.Scan0, destPixels.Length);
+           // bitmap.UnlockBits(bmpData);
+            int alphaWidth = Math.Abs(bmpData.Stride);
+            for (int i = 0; i < bmpData.Height; i++)
+            {
+                System.Runtime.InteropServices.Marshal.Copy(destPixels, i * alphaWidth, IntPtr.Add(bmpData.Scan0, i * bmpData.Stride), alphaWidth);
+            }
             bitmap.UnlockBits(bmpData);
 
             return bitmap;
@@ -2037,7 +2066,13 @@ namespace System.Drawing
 
             Bitmap bitmap = new Bitmap(width, height, Imaging.PixelFormat.Format32bppArgb);
             System.Drawing.Imaging.BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), Imaging.ImageLockMode.WriteOnly, bitmap.PixelFormat);
-            System.Runtime.InteropServices.Marshal.Copy(destPixels, 0, bmpData.Scan0, destPixels.Length);
+           // System.Runtime.InteropServices.Marshal.Copy(destPixels, 0, bmpData.Scan0, destPixels.Length);
+           // bitmap.UnlockBits(bmpData);
+            int alphaWidth = Math.Abs(bmpData.Stride);
+            for (int i = 0; i < bmpData.Height; i++)
+            {
+                System.Runtime.InteropServices.Marshal.Copy(destPixels, i * alphaWidth, IntPtr.Add(bmpData.Scan0, i * bmpData.Stride), alphaWidth);
+            }
             bitmap.UnlockBits(bmpData);
 
             return bitmap;
