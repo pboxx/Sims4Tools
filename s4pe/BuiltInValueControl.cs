@@ -475,6 +475,43 @@ namespace S4PIDemoFE
             yield break;
         }
     }
+
+    class LRLEControl : ABuiltInValueControl
+    {
+        static uint[] resourceTypes = new uint[] {
+            0x2BC04EDF 
+        };
+
+        PictureBox pb = new PictureBox();
+
+        public LRLEControl(Stream s)
+            : base(s)
+        {
+            if (s == null || s == Stream.Null)
+                return;
+            LRLEResource r = new LRLEResource(1, s);
+            int width = r.Width, height = r.Height;
+            while (width > 1024 || height > 512) { width /= 2; height /= 2; }
+            Bitmap tmp = new Bitmap(r.Image, width, height);
+            pb.Image = tmp;
+        }
+
+        public override bool IsAvailable
+        {
+            get { return true; }
+        }
+
+        public override Control ValueControl
+        {
+            get { return pb; }
+        }
+
+        public override IEnumerable<ToolStripItem> GetContextMenuItems(EventHandler cbk)
+        {
+            yield break;
+        }
+    }
+
     //Used directly by MainForm, so needs to be public
     public class TextControl : ABuiltInValueControl
     {

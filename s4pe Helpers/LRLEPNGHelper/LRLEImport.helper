@@ -1,0 +1,6 @@
+// LRLE Import
+ResourceType: 0x2BC04EDF
+Label: Import From PNG
+Command: Helpers\LRLEPNGHelper\LRLEPNGHelper.exe
+Arguments: /import "{}" 
+Desc: Import a PNG into LRLE Resource
