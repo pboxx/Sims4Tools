@@ -4,7 +4,7 @@ s4pe, based on the s4pi interface library, is an editing tool for the .package f
 Current Version
 ----
 
-[0.4.6-beta] is the most recent version. The latest code can be found in the [develop branch] (https://github.com/s4ptacle/Sims4Tools/tree/develop).
+[0.6.0] is the most recent version. The latest code can be found in the [develop branch] (https://github.com/s4ptacle/Sims4Tools/tree/develop).
 
 The [repository we forked from] is not being maintained any more. 
 
