@@ -1,10 +1,10 @@
-s4pe, based on the s4pi interface library, is an editing tool for the .package format used with [The Sims 4]. This is an open source project based on [s3pi and s3pe]. Documentation on s3pi ([Sims 3 Package Interface]) can be found [here] (http://s3pi.sourceforge.net/); a lot of this is still relevant. 
+s4pe, based on the s4pi interface library, is an editing tool for the .package format used with [The Sims 4]. This is an open source project based on [s3pi and s3pe]. Documentation on s3pi ([Sims 3 Package Interface]) can be found [here](http://s3pi.sourceforge.net/); a lot of this is still relevant. 
 
 
 Current Version
 ----
 
-[0.4.6-beta] is the most recent version. The latest code can be found in the [develop branch] (https://github.com/s4ptacle/Sims4Tools/tree/develop).
+[0.4.6-beta] is the most recent version. The latest code can be found in the [develop branch](https://github.com/s4ptacle/Sims4Tools/tree/develop).
 
 The [repository we forked from] is not being maintained any more. 
 
@@ -12,7 +12,7 @@ The [repository we forked from] is not being maintained any more.
 Contributors
 -----------
 
-Roughly in chronological order -- [full details here] (https://github.com/s4ptacle/Sims4Tools/graphs/contributors)
+Roughly in chronological order -- [full details here](https://github.com/s4ptacle/Sims4Tools/graphs/contributors)
 
 * Peter Jones - Main author of s3pe/s3pi
 * [Rick] - a pioneer in TS4
@@ -22,9 +22,9 @@ Roughly in chronological order -- [full details here] (https://github.com/s4ptac
 * [snaitf] - Decoding and contributions for CCOL, COBJ, trims as well as bugfixes
 * [IngeJones] - a kind lady who doesn't want her name mentioned
 * [Kuree] - Maintained the project in 2014 and 2015
-* [CmarNYC] - current contributions see [here] (https://github.com/s4ptacle/Sims4Tools/commits/develop?author=cmarNYC)
-* [pbox] - current contributions see [here] (https://github.com/s4ptacle/Sims4Tools/commits/develop?author=pboxx)
-* [Buzzler] - current contributions see [here] (https://github.com/s4ptacle/Sims4Tools/commits/develop?author=BrutalBuzzler)
+* [CmarNYC] - current contributions see [here](https://github.com/s4ptacle/Sims4Tools/commits/develop?author=cmarNYC)
+* [pbox] - current contributions see [here](https://github.com/s4ptacle/Sims4Tools/commits/develop?author=pboxx)
+* [Buzzler] - current contributions see [here](https://github.com/s4ptacle/Sims4Tools/commits/develop?author=BrutalBuzzler)
 
 Requirements
 -------------
